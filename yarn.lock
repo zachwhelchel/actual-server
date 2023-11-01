@@ -16,13 +16,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/web@npm:23.10.0":
-  version: 23.10.0
-  resolution: "@actual-app/web@npm:23.10.0"
-  checksum: bcff1abea060b73bf5865d7ba5e08105500456c19cddbbd816cd1ad88be33448dc6699496d6dc2d742405bafd5e7846578a4420e3beec90a0de8c579edc8b700
-  languageName: node
-  linkType: hard
-
 "@ampproject/remapping@npm:^2.1.0":
   version: 2.2.0
   resolution: "@ampproject/remapping@npm:2.2.0"
@@ -1525,6 +1518,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@zachwhelchel/actual-app-web@npm:23.10.0":
+  version: 23.10.0
+  resolution: "@zachwhelchel/actual-app-web@npm:23.10.0"
+  checksum: f47b9156bb3ed405e8ba4d76bce7ed4cc8aeaf758e00d9b14039bb90c3d42aac54d016df5f1f4ac0dc1ef1ed7353800e83c0c32763034884c657c4c222a731b7
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:1, abbrev@npm:^1.0.0":
   version: 1.1.1
   resolution: "abbrev@npm:1.1.1"
@@ -1565,7 +1565,6 @@ __metadata:
   resolution: "actual-sync@workspace:."
   dependencies:
     "@actual-app/crdt": 2.1.0
-    "@actual-app/web": 23.10.0
     "@babel/preset-typescript": ^7.20.2
     "@types/bcrypt": ^5.0.0
     "@types/better-sqlite3": ^7.6.3
@@ -1578,6 +1577,7 @@ __metadata:
     "@types/uuid": ^9.0.0
     "@typescript-eslint/eslint-plugin": ^5.51.0
     "@typescript-eslint/parser": ^5.51.0
+    "@zachwhelchel/actual-app-web": 23.10.0
     bcrypt: ^5.1.0
     better-sqlite3: ^8.2.0
     body-parser: ^1.20.1
