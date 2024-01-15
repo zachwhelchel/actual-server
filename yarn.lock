@@ -1518,10 +1518,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zachwhelchel/actual-app-web@npm:23.9.18":
-  version: 23.9.18
-  resolution: "@zachwhelchel/actual-app-web@npm:23.9.18"
-  checksum: 56c125f60cfc6857321e0641834a436a757e50e0a71b9cd8d17752910fa3937e7c76007cee6557c01d88f1fcb855bb1163164d5dc5f2e8fbc3b5ee58a96cd60a
+"@zachwhelchel/actual-app-web@npm:23.9.19":
+  version: 23.9.19
+  resolution: "@zachwhelchel/actual-app-web@npm:23.9.19"
+  checksum: 73592bddb021dd350d2ac9fb501b91afe25f4032b50e751203825e6b9603c4d120318b21c3c875747a47e95b7a86d376fd58e70cc93c4b60c24eeb5375664406
   languageName: node
   linkType: hard
 
@@ -1577,7 +1577,7 @@ __metadata:
     "@types/uuid": ^9.0.0
     "@typescript-eslint/eslint-plugin": ^5.51.0
     "@typescript-eslint/parser": ^5.51.0
-    "@zachwhelchel/actual-app-web": 23.9.18
+    "@zachwhelchel/actual-app-web": 23.9.19
     bcrypt: ^5.1.0
     better-sqlite3: ^8.2.0
     body-parser: ^1.20.1
