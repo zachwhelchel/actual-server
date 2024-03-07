@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "23.9.33",
+  "version": "23.9.34",
   "license": "MIT",
   "description": "actual syncing server",
   "type": "module",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@actual-app/crdt": "2.1.0",
-    "@zachwhelchel/actual-app-web": "23.9.33",
+    "@zachwhelchel/actual-app-web": "23.9.34",
     "bcrypt": "^5.1.0",
     "better-sqlite3": "^9.1.1",
     "body-parser": "^1.20.1",
