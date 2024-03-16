@@ -11,6 +11,7 @@ import * as syncApp from './app-sync.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as secretApp from './app-secrets.js';
+import * as envvariablesApp from './app-envvariables.js';
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use('/account', accountApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/secret', secretApp.handlers);
+app.use('/envvariables', envvariablesApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.mode);
