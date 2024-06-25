@@ -1,4 +1,5 @@
 import express from 'express';
+import { StreamChat } from 'stream-chat';
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.get('/', async (req, res) => {
   let REACT_APP_START_PAYING_DATE = process.env.REACT_APP_START_PAYING_DATE;
   let REACT_APP_ZOOM_RATE = process.env.REACT_APP_ZOOM_RATE;
   let REACT_APP_ZOOM_LINK = process.env.REACT_APP_ZOOM_LINK;
+  let REACT_APP_CHAT_USER_ID = process.env.REACT_APP_CHAT_USER_ID;
   let REACT_APP_COACH = process.env.REACT_APP_COACH;
   let REACT_APP_COACH_FIRST_NAME = process.env.REACT_APP_COACH_FIRST_NAME;
   let REACT_APP_USER_FIRST_NAME = process.env.REACT_APP_USER_FIRST_NAME;
@@ -31,6 +33,7 @@ app.get('/', async (req, res) => {
       REACT_APP_START_PAYING_DATE: REACT_APP_START_PAYING_DATE, 
       REACT_APP_ZOOM_RATE: REACT_APP_ZOOM_RATE, 
       REACT_APP_ZOOM_LINK: REACT_APP_ZOOM_LINK, 
+      REACT_APP_CHAT_USER_ID: REACT_APP_CHAT_USER_ID, 
       REACT_APP_COACH: REACT_APP_COACH, 
       REACT_APP_COACH_FIRST_NAME: REACT_APP_COACH_FIRST_NAME, 
       REACT_APP_USER_FIRST_NAME: REACT_APP_USER_FIRST_NAME, 

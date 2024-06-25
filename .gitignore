@@ -17,6 +17,7 @@ build/
 artifacts.json
 .migrate
 .migrate-test
+.env
 
 # Yarn
 .pnp.*
