@@ -8,7 +8,7 @@ export { app as handlers };
 app.use(express.json());
 
 app.use(async (req, res, next) => {
-    console.log("whyme FRIEND:" + JSON.stringify(req.headers))
+    console.log("hawktua:" + JSON.stringify(req.headers))
 
 
   let user = await validateUser(req, res);
@@ -27,11 +27,18 @@ app.post('/', async (req, res) => {
   const api_secret = process.env.REACT_APP_CHAT_SECRET
   const user_id = process.env.REACT_APP_CHAT_USER_ID
 
+    console.log("hawktua api_secret:" + api_secret)
+    console.log("hawktua user_id:" + user_id)
 
   // Initialize a Server Client
   const serverClient = StreamChat.getInstance(api_key, api_secret);
   // Create User Token
+
+      console.log("hawktua serverClient:" + serverClient)
+
   const token = serverClient.createToken(user_id);
+
+      console.log("hawktua token:" + token)
 
   console.log("Sending chat access token: " + token);
 
