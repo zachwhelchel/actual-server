@@ -23,9 +23,10 @@ app.use(async (req, res, next) => {
 app.post('/', async (req, res) => {
 
   // Define values.
-  const api_key = '4q98r9p2kn2g'
-  const api_secret = 'yjwpkgg4k9pqg989a62x4k2jkgyjzayv6hzw9wy7vj3yeaxupr3ynrgj8fvgeecm'
+  const api_key = '4skd9jkc6pyk'
+  const api_secret = process.env.REACT_APP_CHAT_SECRET
   const user_id = process.env.REACT_APP_CHAT_USER_ID
+
 
   // Initialize a Server Client
   const serverClient = StreamChat.getInstance(api_key, api_secret);
