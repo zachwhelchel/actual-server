@@ -23,6 +23,7 @@ app.get('/', async (req, res) => {
   let REACT_APP_COACH = process.env.REACT_APP_COACH;
   let REACT_APP_COACH_FIRST_NAME = process.env.REACT_APP_COACH_FIRST_NAME;
   let REACT_APP_USER_FIRST_NAME = process.env.REACT_APP_USER_FIRST_NAME;
+  let REACT_APP_USER_EMAIL = process.env.REACT_APP_USER_EMAIL;
   let REACT_APP_UI_MODE = process.env.REACT_APP_UI_MODE;
 
   res.send({
@@ -37,6 +38,7 @@ app.get('/', async (req, res) => {
       REACT_APP_COACH: REACT_APP_COACH, 
       REACT_APP_COACH_FIRST_NAME: REACT_APP_COACH_FIRST_NAME, 
       REACT_APP_USER_FIRST_NAME: REACT_APP_USER_FIRST_NAME, 
+      REACT_APP_USER_EMAIL: REACT_APP_USER_EMAIL, 
       REACT_APP_UI_MODE: REACT_APP_UI_MODE,  
     },
   });

@@ -32,6 +32,9 @@ ENV REACT_APP_COACH_FIRST_NAME=$REACT_APP_COACH_FIRST_NAME
 ARG REACT_APP_USER_FIRST_NAME
 ENV REACT_APP_USER_FIRST_NAME=$REACT_APP_USER_FIRST_NAME
 
+ARG REACT_APP_USER_EMAIL
+ENV REACT_APP_USER_EMAIL=$REACT_APP_USER_EMAIL
+
 RUN yarn workspaces focus --all --production
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
