@@ -5,7 +5,7 @@
   "description": "actual syncing server",
   "type": "module",
   "scripts": {
-    "start": "node app",
+    "start": "node --env-file=.env app",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "build": "tsc",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@actual-app/crdt": "2.1.0",
-    "@actual-app/web": "25.1.0",
+    "@zachwhelchel/actual-app-web": "23.9.96",
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^11.7.0",
     "body-parser": "^1.20.3",
@@ -41,6 +41,7 @@
     "openid-client": "^5.4.2",
     "uuid": "^9.0.0",
     "winston": "^3.14.2"
+    "stream-chat": "^8.36.0",
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.20.2",
@@ -64,6 +65,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "packageManager": "yarn@4.3.1"
+  }
 }

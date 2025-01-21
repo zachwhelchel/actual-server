@@ -13,6 +13,8 @@ import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as secretApp from './app-secrets.js';
 import * as adminApp from './app-admin.js';
 import * as openidApp from './app-openid.js';
+import * as envvariablesApp from './app-envvariables.js';
+import * as chatsecretsApp from './app-chatsecrets.js';
 
 const app = express();
 
@@ -49,6 +51,8 @@ app.use('/account', accountApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/secret', secretApp.handlers);
+app.use('/envvariables', envvariablesApp.handlers);
+app.use('/chatsecrets', chatsecretsApp.handlers);
 
 app.use('/admin', adminApp.handlers);
 app.use('/openid', openidApp.handlers);

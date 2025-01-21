@@ -67,8 +67,8 @@ let defaultConfig = {
   webRoot: path.join(
     projectRoot,
     'node_modules',
-    '@actual-app',
-    'web',
+    '@zachwhelchel',
+    'actual-app-web',
     'build',
   ),
   upload: {
