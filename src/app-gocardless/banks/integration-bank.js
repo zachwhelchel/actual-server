@@ -1,9 +1,10 @@
 import * as d from 'date-fns';
 import {
-  sortByBookingDateOrValueDate,
   amountToInteger,
   printIban,
+  sortByBookingDateOrValueDate,
 } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -27,7 +28,7 @@ export default {
   accessValidForDays: 90,
 
   normalizeAccount(account) {
-    console.log(
+    console.debug(
       'Available account properties for new institution integration',
       { account: JSON.stringify(account) },
     );
@@ -59,12 +60,13 @@ export default {
     }
     return {
       ...transaction,
+      payeeName: formatPayeeName(transaction),
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
     };
   },
 
   sortTransactions(transactions = []) {
-    console.log(
+    console.debug(
       'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
       { top10Transactions: JSON.stringify(transactions.slice(0, 10)) },
     );
@@ -72,7 +74,7 @@ export default {
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    console.log(
+    console.debug(
       'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
       {
         balances: JSON.stringify(balances),
