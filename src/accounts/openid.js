@@ -124,6 +124,7 @@ export async function loginWithOpenIdSetup(returnUrl) {
     state,
     code_challenge,
     code_challenge_method: 'S256',
+    prompt: 'login'
   });
 
   return { url };
@@ -201,63 +202,51 @@ export async function loginWithOpenIdFinalize(body) {
     let userId = null;
     try {
       accountDb.transaction(() => {
-        let { countUsersWithUserName } = accountDb.first(
-          'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
-          [''],
+        // Check if user already exists
+        const existingUser = accountDb.first(
+          'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
+          [identity]
         );
-        if (countUsersWithUserName === 0) {
-          userId = uuid.v4();
-          // Check if user was created by another transaction
-          const existingUser = accountDb.first(
-            'SELECT id FROM users WHERE user_name = ?',
-            [identity],
-          );
-          if (existingUser) {
-            throw new Error('user-already-exists');
+
+        if (existingUser) {
+          // Update display name if needed
+          if (!existingUser.display_name && userInfo.name) {
+            accountDb.mutate('UPDATE users set display_name = ? WHERE id = ?', [
+              userInfo.name,
+              existingUser.id
+            ]);
           }
+          userId = existingUser.id;
+        } else {
+          // Create new user
+          userId = uuid.v4();
+          const isFirstUser = accountDb.first(
+            'SELECT count(*) as count FROM users WHERE user_name <> ?',
+            ['']
+          ).count === 0;
+
           accountDb.mutate(
-            'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
+            'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, ?, ?)',
             [
               userId,
               identity,
               userInfo.name ?? userInfo.email ?? identity,
-              'ADMIN',
-            ],
+              isFirstUser ? 1 : 0,
+              isFirstUser ? 'ADMIN' : 'USER'
+            ]
           );
 
-          const userFromPasswordMethod = getUserByUsername('');
-          if (userFromPasswordMethod) {
-            transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
+          // Transfer files if this is first user
+          if (isFirstUser) {
+            const userFromPasswordMethod = getUserByUsername('');
+            if (userFromPasswordMethod) {
+              transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
+            }
           }
-        } else {
-          let { id: userIdFromDb, display_name: displayName } =
-            accountDb.first(
-              'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
-              [identity],
-            ) || {};
-
-          if (userIdFromDb == null) {
-            throw new Error('openid-grant-failed');
-          }
-
-          if (!displayName && userInfo.name) {
-            accountDb.mutate('UPDATE users set display_name = ? WHERE id = ?', [
-              userInfo.name,
-              userIdFromDb,
-            ]);
-          }
-
-          userId = userIdFromDb;
         }
       });
     } catch (error) {
-      if (error.message === 'user-already-exists') {
-        return { error: 'user-already-exists' };
-      } else if (error.message === 'openid-grant-failed') {
-        return { error: 'openid-grant-failed' };
-      } else {
-        throw error; // Re-throw other unexpected errors
-      }
+      throw error;
     }
 
     const token = uuid.v4();

@@ -14,6 +14,7 @@ import * as secretApp from './app-secrets.js';
 import * as adminApp from './app-admin.js';
 import * as openidApp from './app-openid.js';
 import * as envvariablesApp from './app-envvariables.js';
+import * as airtableApp from './app-airtable.js';
 import * as chatsecretsApp from './app-chatsecrets.js';
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/secret', secretApp.handlers);
 app.use('/envvariables', envvariablesApp.handlers);
+app.use('/airtable', airtableApp.handlers);
 app.use('/chatsecrets', chatsecretsApp.handlers);
 
 app.use('/admin', adminApp.handlers);
