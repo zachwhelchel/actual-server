@@ -8,6 +8,7 @@ import {
 import validateSession from './util/validate-user.js';
 import { isAdmin } from './account-db.js';
 import * as UserService from './services/user-service.js';
+import Airtable from 'airtable';
 
 let app = express();
 app.use(express.json());
@@ -318,6 +319,7 @@ app.delete('/access', (req, res) => {
 
 app.get('/access/users', validateSessionMiddleware, async (req, res) => {
   const fileId = req.query.fileId;
+  const session = validateSession(req, res);
 
   const { granted } = UserService.checkFilePermission(
     fileId,
@@ -346,7 +348,43 @@ app.get('/access/users', validateSessionMiddleware, async (req, res) => {
   }
 
   const users = UserService.getAllUserAccess(fileId);
-  res.json(users);
+
+
+//filter it down based on who you are...
+console.log('here we will filter')
+console.log(users)
+
+
+  let allowedIds = [];
+  allowedIds.push(session.user_id);
+  allowedIds.push("whateversupportendsupbeing");
+
+  const base = new Airtable({
+    apiKey:'patD1GWrGGJA0pvQ9.9e5b4ebdaf739900ef004a7a8b2ef58693cb444c39e547859b54492e474cc721'
+  }).base('appYAaDkGzB3ecOzl');
+
+  const existingRecords = await base('Accounts').select({
+    filterByFormula: `{user_id} = '${session.user_id}'`
+  }).all();
+
+  console.log('existingRecords')
+  console.log(existingRecords)
+
+  if (existingRecords.length > 0) {
+    if (existingRecords?.[0]?.get('coach_user_id')?.[0]) {
+        console.log(existingRecords)
+
+      allowedIds.push(existingRecords[0].get('coach_user_id')[0]);
+    }
+  }
+
+
+
+  const filteredUsers = users.filter(user => allowedIds.includes(user.userId) || user.haveAccess === 1);
+
+
+
+  res.json(filteredUsers);
 });
 
 app.post(
