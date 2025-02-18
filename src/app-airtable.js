@@ -39,6 +39,10 @@ export { app as handlers };
 
 app.post('/user', async (req, res) => {
 
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
   console.log("Sending dataaaaaa.");
   //console.log(req);
 
@@ -51,12 +55,12 @@ app.post('/user', async (req, res) => {
   console.log(req.body)
 
   const base = new Airtable({
-    apiKey:'patD1GWrGGJA0pvQ9.9e5b4ebdaf739900ef004a7a8b2ef58693cb444c39e547859b54492e474cc721'
-  }).base('appYAaDkGzB3ecOzl');
+    apiKey:REACT_APP_AIRTABLE_KEY
+  }).base(REACT_APP_AIRTABLE_BASE);
 
   try {
     // First try to find the user
-    const existingRecords = await base('Accounts').select({
+    const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
       filterByFormula: `{user_id} = '${session.user_id}'`
     }).all();
 
@@ -121,6 +125,10 @@ app.post('/user', async (req, res) => {
 
 app.post('/update-coach', async (req, res) => {
 
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
   console.log("Sending dataaaaaa.");
   //console.log(req);
 
@@ -136,10 +144,10 @@ app.post('/update-coach', async (req, res) => {
   let coachId = req.body.coachId;
 
   const base = new Airtable({
-    apiKey:'patD1GWrGGJA0pvQ9.9e5b4ebdaf739900ef004a7a8b2ef58693cb444c39e547859b54492e474cc721'
-  }).base('appYAaDkGzB3ecOzl');
+    apiKey:REACT_APP_AIRTABLE_KEY
+  }).base(REACT_APP_AIRTABLE_BASE);
 
-  const existingRecords = await base('Accounts').select({
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
     filterByFormula: `{user_id} = '${userId}'`
   }).all();
 
@@ -181,6 +189,10 @@ app.post('/update-coach', async (req, res) => {
 
 app.post('/update-user', async (req, res) => {
 
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
   console.log("Sending dataaaaaa.");
 
   const session = validateSession(req, res);
@@ -194,10 +206,10 @@ app.post('/update-user', async (req, res) => {
   let userId = session.user_id;
 
   const base = new Airtable({
-    apiKey:'patD1GWrGGJA0pvQ9.9e5b4ebdaf739900ef004a7a8b2ef58693cb444c39e547859b54492e474cc721'
-  }).base('appYAaDkGzB3ecOzl');
+    apiKey:REACT_APP_AIRTABLE_KEY
+  }).base(REACT_APP_AIRTABLE_BASE);
 
-  const existingRecords = await base('Accounts').select({
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
     filterByFormula: `{user_id} = '${session.user_id}'`
   }).all();
 
@@ -252,6 +264,10 @@ app.post('/update-user', async (req, res) => {
 
 app.post('/update-local-storage-sync', async (req, res) => {
 
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
   console.log("Sending dataaaaaa.");
 
   const session = validateSession(req, res);
@@ -266,11 +282,11 @@ app.post('/update-local-storage-sync', async (req, res) => {
 
   // Update record in Airtable
   const base = new Airtable({
-    apiKey:'patD1GWrGGJA0pvQ9.9e5b4ebdaf739900ef004a7a8b2ef58693cb444c39e547859b54492e474cc721'
-  }).base('appYAaDkGzB3ecOzl');
+    apiKey:REACT_APP_AIRTABLE_KEY
+  }).base(REACT_APP_AIRTABLE_BASE);
 
 
-  const existingRecords = await base('Accounts').select({
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
     filterByFormula: `{user_id} = '${session.user_id}'`
   }).all();
 
