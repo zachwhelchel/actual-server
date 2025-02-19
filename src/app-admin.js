@@ -355,15 +355,20 @@ console.log('here we will filter')
 console.log(users)
 
 
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+
   let allowedIds = [];
   allowedIds.push(session.user_id);
   allowedIds.push("whateversupportendsupbeing");
 
   const base = new Airtable({
-    apiKey:'patD1GWrGGJA0pvQ9.9e5b4ebdaf739900ef004a7a8b2ef58693cb444c39e547859b54492e474cc721'
-  }).base('appYAaDkGzB3ecOzl');
+    apiKey:REACT_APP_AIRTABLE_KEY
+  }).base(REACT_APP_AIRTABLE_BASE);
 
-  const existingRecords = await base('Accounts').select({
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
     filterByFormula: `{user_id} = '${session.user_id}'`
   }).all();
 

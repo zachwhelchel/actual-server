@@ -7,6 +7,10 @@ import {
 import validateSession from './util/validate-user.js';
 import Airtable from 'airtable';
 
+import {
+  getUserInfo,
+} from './account-db.js';
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -67,6 +71,47 @@ app.post('/user', async (req, res) => {
     console.log('existingRecords')
     //console.log(userId)
 
+
+
+
+
+
+    // If user doesn't exist, create new record
+    // Ok here, creating a user for the first time... we want to:
+    // associate them with the openId id
+    // set defaults for first/last/email
+    // switch the proxy for the form to heard about us or something
+    const user = getUserInfo(session.user_id);
+    console.log('getUserInfo')
+    console.log(user)
+
+
+    function splitDisplayName(displayName) {
+      if (!displayName || typeof displayName !== 'string') {
+        return { firstName: null, lastName: null };
+      }
+
+      // Trim and split the name
+      const parts = displayName.trim().split(/\s+/);
+      
+      // Check if we have at least two parts that look like names
+      // (no special characters, numbers, etc)
+      if (parts.length >= 2 && parts.every(part => /^[A-Za-z-']+$/.test(part))) {
+        return {
+          firstName: parts[0],
+          lastName: parts.slice(1).join(' ') // Handles middle names as part of lastName
+        };
+      }
+
+      return { firstName: null, lastName: null };
+    }
+
+    const { firstName, lastName } = splitDisplayName(user.display_name);
+
+
+
+
+
     // If user exists, return the record
     if (existingRecords.length > 0) {
       res.send({
@@ -76,13 +121,15 @@ app.post('/user', async (req, res) => {
       return;
     }
 
-    // If user doesn't exist, create new record
-
     if (req.body.coachId !== null && req.body.coachId !== undefined && req.body.coachId !== '') {
-      const newRecord = await base('Accounts').create([
+      const newRecord = await base(REACT_APP_AIRTABLE_TABLE).create([
         {
           fields: {
             user_id: session.user_id,
+            autho_id: user.user_name,
+            email: user.email,
+            first_name: firstName,
+            last_name: lastName,
             coach: [params.coach]
           }
         }
@@ -94,10 +141,14 @@ app.post('/user', async (req, res) => {
       });
       return;
     } else {
-      const newRecord = await base('Accounts').create([
+      const newRecord = await base(REACT_APP_AIRTABLE_TABLE).create([
         {
           fields: {
-            user_id: session.user_id
+            user_id: session.user_id,
+            autho_id: user.user_name,
+            email: user.email,
+            first_name: firstName,
+            last_name: lastName
           }
         }
       ]);
@@ -157,7 +208,7 @@ app.post('/update-coach', async (req, res) => {
   }
 
   try {
-    const updatedRecord = await base('Accounts').update([
+    const updatedRecord = await base(REACT_APP_AIRTABLE_TABLE).update([
       {
         id: userId,
         fields: {
@@ -219,7 +270,7 @@ app.post('/update-user', async (req, res) => {
   }
 
   try {
-    const updatedRecord = await base('Accounts').update([
+    const updatedRecord = await base(REACT_APP_AIRTABLE_TABLE).update([
       {
         id: userId,
         fields: {
@@ -297,7 +348,7 @@ app.post('/update-local-storage-sync', async (req, res) => {
 
  // Update record in Airtable
   try {
-    const response = await base('Accounts').update([
+    const response = await base(REACT_APP_AIRTABLE_TABLE).update([
       {
         id: userId,
         fields: {
