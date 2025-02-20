@@ -126,7 +126,7 @@ app.post('/user', async (req, res) => {
         {
           fields: {
             user_id: session.user_id,
-            autho_id: user.user_name,
+            auth0_id: user.user_name,
             email: user.email,
             first_name: firstName,
             last_name: lastName,
@@ -145,7 +145,7 @@ app.post('/user', async (req, res) => {
         {
           fields: {
             user_id: session.user_id,
-            autho_id: user.user_name,
+            auth0_id: user.user_name,
             email: user.email,
             first_name: firstName,
             last_name: lastName
