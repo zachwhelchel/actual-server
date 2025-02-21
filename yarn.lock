@@ -1604,6 +1604,7 @@ __metadata:
     migrate: "npm:^2.0.1"
     nordigen-node: "npm:^1.4.0"
     openid-client: "npm:^5.4.2"
+    plaid: "npm:^31.0.0"
     prettier: "npm:^2.8.3"
     stream-chat: "npm:^8.36.0"
     supertest: "npm:^6.3.1"
@@ -1810,7 +1811,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.6.0":
+"axios@npm:^1.6.0, axios@npm:^1.7.4":
   version: 1.7.9
   resolution: "axios@npm:1.7.9"
   dependencies:
@@ -5390,6 +5391,15 @@ __metadata:
   dependencies:
     find-up: "npm:^4.0.0"
   checksum: 10c0/c56bda7769e04907a88423feb320babaed0711af8c436ce3e56763ab1021ba107c7b0cafb11cde7529f669cfc22bffcaebffb573645cbd63842ea9fb17cd7728
+  languageName: node
+  linkType: hard
+
+"plaid@npm:^31.0.0":
+  version: 31.0.0
+  resolution: "plaid@npm:31.0.0"
+  dependencies:
+    axios: "npm:^1.7.4"
+  checksum: 10c0/826bb380314bb0fa4032dfbaf74bca1b01399b439f80acdc9b8ce1a2c83cba068e840b5d664d8f4fdb034b9abaac775469a9c42ee11afeac60ca3ed7004c7e3e
   languageName: node
   linkType: hard
 
