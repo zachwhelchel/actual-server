@@ -49,10 +49,10 @@ app.post('/api/create_link_token', async function (request, response) {
       client_user_id: clientUserId,
     },
     client_name: 'Plaid Test App',
-    products: ['auth'],
+    products: ['transactions'],
     language: 'en',
     webhook: 'https://webhook.example.com',
-    redirect_uri: 'http://localhost:3001/plaid/callback',
+    redirect_uri: 'http://localhost:3001/accounts',
     country_codes: ['US'],
   };
   try {
@@ -78,3 +78,36 @@ app.post('/api/create_link_token', async function (request, response) {
 
   }
 });
+
+
+app.post('/api/exchange_public_token', async function (request, response) {
+          console.log('exchange_public_token')
+          console.log(request.body)
+
+  const publicToken = request.body.public_token;
+
+  try {
+    const response = await plaidClient.itemPublicTokenExchange({
+      public_token: publicToken,
+    });
+
+    // These values should be saved to a persistent database and
+    // associated with the currently signed-in user
+    const accessToken = response.data.access_token;
+    const itemID = response.data.item_id;
+
+    console.log('accessToken')
+    console.log(accessToken)
+    console.log('itemID')
+    console.log(itemID)
+
+    res.json({ public_token_exchange: 'complete' });
+  } catch (error) {
+    // handle error
+
+        console.log(error)
+
+  }
+});
+
+
