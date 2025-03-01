@@ -73,6 +73,9 @@ app.post('/api/create_link_token', async function (request, response) {
     let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
     let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
     let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+    let REACT_APP_AIRTABLE_ACCOUNT_FIELD = process.env.REACT_APP_AIRTABLE_ACCOUNT_FIELD;
+
+
 
     // Set up Airtable connection
     const base = new Airtable({ 
@@ -83,7 +86,7 @@ app.post('/api/create_link_token', async function (request, response) {
     // 2. Get all Plaid items associated with this account    
     const plaidItemsRecords = await base('PlaidItems').select({
       filterByFormula: `AND(
-        FIND('${userId}', {stage_account}),
+        FIND('${userId}', {${REACT_APP_AIRTABLE_ACCOUNT_FIELD}}),
         {item_id} = '${item_id}'
       )`,
       maxRecords: 1  // This limits the result to just the first match
@@ -231,6 +234,7 @@ app.post('/institutions', async function (request, response) {
     let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
     let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
     let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+    let REACT_APP_AIRTABLE_ACCOUNT_FIELD = process.env.REACT_APP_AIRTABLE_ACCOUNT_FIELD;
 
     // Set up Airtable connection
     const base = new Airtable({ 
@@ -240,7 +244,7 @@ app.post('/institutions', async function (request, response) {
         
     // 2. Get all Plaid items associated with this account    
     const plaidItemsRecords = await base('PlaidItems').select({
-      filterByFormula: `FIND('${userId}', {stage_account})`
+      filterByFormula: `FIND('${userId}', {${REACT_APP_AIRTABLE_ACCOUNT_FIELD}})`
     }).all();
 
     if (plaidItemsRecords.length === 0) {
@@ -336,6 +340,7 @@ app.post('/institution/remove', async function (request, response) {
     let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
     let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
     let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+    let REACT_APP_AIRTABLE_ACCOUNT_FIELD = process.env.REACT_APP_AIRTABLE_ACCOUNT_FIELD;
 
     // Set up Airtable connection
     const base = new Airtable({ 
@@ -346,7 +351,7 @@ app.post('/institution/remove', async function (request, response) {
     // 2. Get all Plaid items associated with this account    
     const plaidItemsRecords = await base('PlaidItems').select({
       filterByFormula: `AND(
-        FIND('${userId}', {stage_account}),
+        FIND('${userId}', {${REACT_APP_AIRTABLE_ACCOUNT_FIELD}}),
         {item_id} = '${item_id}'
       )`,
       maxRecords: 1  // This limits the result to just the first match
@@ -423,6 +428,7 @@ app.post('/accounts', async function (request, response) {
     let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
     let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
     let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+    let REACT_APP_AIRTABLE_ACCOUNT_FIELD = process.env.REACT_APP_AIRTABLE_ACCOUNT_FIELD;
 
     // Set up Airtable connection
     const base = new Airtable({ 
@@ -432,7 +438,7 @@ app.post('/accounts', async function (request, response) {
         
     // 2. Get all Plaid items associated with this account    
     const plaidItemsRecords = await base('PlaidItems').select({
-      filterByFormula: `FIND('${userId}', {stage_account})`
+      filterByFormula: `FIND('${userId}', {${REACT_APP_AIRTABLE_ACCOUNT_FIELD}})`
     }).all();
 
     if (plaidItemsRecords.length === 0) {
@@ -1027,7 +1033,7 @@ async function savePlaidItemToAirtable(itemId, accessToken, userId) {
       const existingRecord = existingRecords[0];
       result = await base('PlaidItems').update(existingRecord.id, {
         access_token: accessToken,
-        stage_account: [stageAccountId] // This maintains the relationship
+        [tableName]: [stageAccountId] // This maintains the relationship
       });
       console.log('Updated existing record');
     } else {
@@ -1035,7 +1041,7 @@ async function savePlaidItemToAirtable(itemId, accessToken, userId) {
       result = await base('PlaidItems').create({
         item_id: itemId,
         access_token: accessToken,
-        stage_account: [stageAccountId] // This creates the relationship
+        [tableName]: [stageAccountId] // This creates the relationship
       });
       console.log('Created new record');
     }
