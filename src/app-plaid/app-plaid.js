@@ -106,7 +106,7 @@ app.post('/api/create_link_token', async function (request, response) {
         // This should correspond to a unique id for the current user.
         client_user_id: clientUserId,
       },
-      client_name: 'Plaid Test App',
+      client_name: 'MyBudgetCoach',
       language: 'en',
       webhook: 'https://webhook.example.com',
       redirect_uri: REACT_APP_PLAID_REDIRECT_URL,
@@ -124,7 +124,7 @@ app.post('/api/create_link_token', async function (request, response) {
         // This should correspond to a unique id for the current user.
         client_user_id: clientUserId,
       },
-      client_name: 'Plaid Test App',
+      client_name: 'MyBudgetCoach',
       products: ['transactions'],
       language: 'en',
       webhook: 'https://webhook.example.com',
@@ -555,44 +555,12 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
 
-      console.log('Alex')
+    const session = validateSession(req, res);
 
-    // const accesses = UserService.getUserAccess(
-    //   fileId,
-    //   res.locals.user_id,
-    //   false,
-    // );
-
-//can it not know what budget you are looking at currently?
-
-    //who does this file belong to?
-    //do I have access to this file?
-    //ok then I can impersonate that user_id it belongs to.
-
-      const session = validateSession(req, res);
-
-      const user = getUserInfo(session.user_id);
-
-      console.log('user')
-      console.log(user)
-
-
-      //follow the path where you lie to me about looking at a different budget you do have access to.
-      //i wouldn't give you the keys to this bank right? because they wouldn't be found because you are only looking
-      //by the right user id.
-
-      //at the end of the day I'm just trying to impersonate the correct userid. can that be faked?
-
-
-
-
+    const user = getUserInfo(session.user_id);
 
 
     const { accountId, startDate, bankId } = req.body;
-
-
-      console.log('startDate')
-      console.log(startDate)
 
 
     try {
