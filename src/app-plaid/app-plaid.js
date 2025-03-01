@@ -18,6 +18,7 @@ app.use(requestLoggerMiddleware);
 
 let REACT_APP_PLAID_CLIENT_ID = process.env.REACT_APP_PLAID_CLIENT_ID;
 let REACT_APP_PLAID_SECRET = process.env.REACT_APP_PLAID_SECRET;
+let REACT_APP_PLAID_REDIRECT_URL = process.env.REACT_APP_PLAID_REDIRECT_URL;
 
 const configuration = new Configuration({
   basePath: PlaidEnvironments.sandbox, // or development/production
@@ -105,7 +106,7 @@ app.post('/api/create_link_token', async function (request, response) {
       client_name: 'Plaid Test App',
       language: 'en',
       webhook: 'https://webhook.example.com',
-      redirect_uri: 'http://localhost:3001/accounts',
+      redirect_uri: REACT_APP_PLAID_REDIRECT_URL,
       country_codes: ['US'],
       access_token: accessToken,
     };
@@ -124,7 +125,7 @@ app.post('/api/create_link_token', async function (request, response) {
       products: ['transactions'],
       language: 'en',
       webhook: 'https://webhook.example.com',
-      redirect_uri: 'http://localhost:3001/accounts',
+      redirect_uri: REACT_APP_PLAID_REDIRECT_URL,
       country_codes: ['US'],
     };
 
