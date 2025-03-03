@@ -68,7 +68,7 @@ let defaultConfig = {
     projectRoot,
     'node_modules',
     '@zachwhelchel',
-    'actual-app-web',
+    'actual-app-web-multi',
     'build',
   ),
   upload: {
