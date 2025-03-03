@@ -11,6 +11,7 @@ export const up = async function () {
         (id TEXT PRIMARY KEY,
         user_name TEXT, 
         display_name TEXT,
+        email TEXT,
         role TEXT,
         enabled INTEGER NOT NULL DEFAULT 1,
         owner INTEGER NOT NULL DEFAULT 0);
@@ -39,8 +40,8 @@ export const up = async function () {
 
     const userId = uuid.v4();
     accountDb.mutate(
-      'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
-      [userId, '', '', 'ADMIN'],
+      'INSERT INTO users (id, user_name, display_name, email, enabled, owner, role) VALUES (?, ?, ?, ?, 1, 1, ?)',
+      [userId, '', '', '', 'ADMIN'],
     );
 
     accountDb.mutate(

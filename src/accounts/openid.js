@@ -188,13 +188,18 @@ export async function loginWithOpenIdFinalize(body) {
       });
     }
     const userInfo = await client.userinfo(tokenSet.access_token);
+
+    // const identity =
+    //   userInfo.preferred_username ??
+    //   userInfo.login ??
+    //   userInfo.email ??
+    //   userInfo.id ??
+    //   userInfo.name ??
+    //   'default-username';
+
     const identity =
-      userInfo.preferred_username ??
-      userInfo.login ??
-      userInfo.email ??
-      userInfo.id ??
-      userInfo.name ??
-      'default-username';
+      userInfo.sub;
+
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
@@ -226,11 +231,12 @@ export async function loginWithOpenIdFinalize(body) {
           ).count === 0;
 
           accountDb.mutate(
-            'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, ?, ?)',
+            'INSERT INTO users (id, user_name, display_name, email, enabled, owner, role) VALUES (?, ?, ?, ?, 1, ?, ?)',
             [
               userId,
               identity,
               userInfo.name ?? userInfo.email ?? identity,
+              userInfo.email ?? '',
               isFirstUser ? 1 : 0,
               isFirstUser ? 'ADMIN' : 'USER'
             ]
