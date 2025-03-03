@@ -19,9 +19,12 @@ app.use(requestLoggerMiddleware);
 let REACT_APP_PLAID_CLIENT_ID = process.env.REACT_APP_PLAID_CLIENT_ID;
 let REACT_APP_PLAID_SECRET = process.env.REACT_APP_PLAID_SECRET;
 let REACT_APP_PLAID_REDIRECT_URL = process.env.REACT_APP_PLAID_REDIRECT_URL;
+let REACT_APP_PLAID_ENVIRONMENT = process.env.REACT_APP_PLAID_ENVIRONMENT;
+
+
 
 const configuration = new Configuration({
-  basePath: PlaidEnvironments.sandbox, // or development/production
+  basePath: REACT_APP_PLAID_ENVIRONMENT === "production" ? PlaidEnvironments.production : PlaidEnvironments.sandbox, // or development/production
   baseOptions: {
     headers: {
       'PLAID-CLIENT-ID': REACT_APP_PLAID_CLIENT_ID,
@@ -187,7 +190,6 @@ app.post('/api/exchange_public_token', async function (request, response) {
     const itemID = response.data.item_id;
 
     console.log('accessToken')
-    console.log(accessToken)
     console.log('itemID')
     console.log(itemID)
 
@@ -251,7 +253,7 @@ app.post('/institutions', async function (request, response) {
       return response.status(200).json({ accounts: [] }); // No linked accounts yet
     }
 
-    console.log(plaidItemsRecords)
+    // console.log(plaidItemsRecords)
     
     // 4. Fetch accounts from Plaid for each item
     const allInstitutions = [];
@@ -303,7 +305,7 @@ app.post('/institutions', async function (request, response) {
     };
 
 
-    console.log(allInstitutions)
+    // console.log(allInstitutions)
 
     response.send({
       status: 'ok',
@@ -366,7 +368,7 @@ app.post('/institution/remove', async function (request, response) {
     console.log(item_id)
 
     console.log('first_item')
-    console.log(firstRecord)
+    // console.log(firstRecord)
 
     // Check if a record was found before accessing the access_token
     let accessToken = null;
@@ -445,7 +447,7 @@ app.post('/accounts', async function (request, response) {
       return response.status(200).json({ accounts: [] }); // No linked accounts yet
     }
 
-    console.log(plaidItemsRecords)
+    // console.log(plaidItemsRecords)
     
     // 4. Fetch accounts from Plaid for each item
     const allAccounts = [];
@@ -508,7 +510,7 @@ app.post('/accounts', async function (request, response) {
     };
 
 
-    console.log(allAccounts)
+    // console.log(allAccounts)
 
     response.send({
       status: 'ok',
@@ -653,7 +655,7 @@ app.post(
           
           console.log("yolo")
 
-          console.log(record.get('user_id')?.[0])
+          //console.log(record.get('user_id')?.[0])
           console.log(targetId)
 
           // Check if the array contains the target ID
@@ -685,7 +687,7 @@ app.post(
         }
       });
 
-      console.log('Plaid items dictionary:', plaidItemsDict);
+      //console.log('Plaid items dictionary:', plaidItemsDict);
 
 
 
@@ -730,7 +732,7 @@ app.post(
 
 
       console.log('final response')
-      console.log(JSON.stringify(response))
+      //console.log(JSON.stringify(response))
 
       res.send({
         status: 'ok',
@@ -774,7 +776,7 @@ async function getTransactions(accountIds, bankId, startDate, plaidItemsDict, en
       const accessToken = plaidItemsDict[bankId];
 
 
-      console.log(`accessToken ${accessToken}`);
+      //console.log(`accessToken ${accessToken}`);
 
 //plaidItem.access_token will fail because we aren't saving the right thing currently for that accountId to be the itemId
 
@@ -797,8 +799,6 @@ async function getTransactions(accountIds, bankId, startDate, plaidItemsDict, en
         });
         
         const { transactions, total_transactions, accounts } = response.data;
-
-        console.log(transactions)
 
         // Flip the sign of all transaction amounts
         const flippedTransactions = transactions.map(transaction => {
@@ -834,7 +834,6 @@ async function getTransactions(accountIds, bankId, startDate, plaidItemsDict, en
 
     }
 
-      console.log(allTransactions);
 
     const accountsArray = Array.from(allAccounts.values());
 
@@ -971,16 +970,16 @@ async function savePlaidItemToAirtable(itemId, accessToken, userId) {
     }
     
     // 1. Find the StageAccount record for the current user
-    const stageAccountRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
+    const accountRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
       filterByFormula: `{user_id} = '${userId}'`,
       maxRecords: 1
     }).firstPage();
     
-    if (stageAccountRecords.length === 0) {
+    if (accountRecords.length === 0) {
       throw new Error('Account not found for provided userId');
     }
     
-    const stageAccountId = stageAccountRecords[0].id;
+    const accountId = accountRecords[0].id;
     
     // 2. Create the new PlaidItems record with the relationship
 
@@ -1001,7 +1000,7 @@ async function savePlaidItemToAirtable(itemId, accessToken, userId) {
       const existingRecord = existingRecords[0];
       result = await base('PlaidItems').update(existingRecord.id, {
         access_token: accessToken,
-        [tableName]: [stageAccountId] // This maintains the relationship
+        [tableName]: [accountId] // This maintains the relationship
       });
       console.log('Updated existing record');
     } else {
@@ -1009,7 +1008,7 @@ async function savePlaidItemToAirtable(itemId, accessToken, userId) {
       result = await base('PlaidItems').create({
         item_id: itemId,
         access_token: accessToken,
-        [tableName]: [stageAccountId] // This creates the relationship
+        [tableName]: [accountId] // This creates the relationship
       });
       console.log('Created new record');
     }
