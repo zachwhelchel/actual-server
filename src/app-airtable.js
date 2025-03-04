@@ -11,6 +11,8 @@ import {
   getUserInfo,
 } from './account-db.js';
 
+import axios from 'axios';
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -55,8 +57,8 @@ app.post('/user', async (req, res) => {
   console.log('session.user_id')
   console.log(session.user_id)
 
-  console.log('req.body.test')
-  console.log(req.body)
+  //console.log('req.body.test')
+  //console.log(req.body)
 
   const base = new Airtable({
     apiKey:REACT_APP_AIRTABLE_KEY
@@ -110,16 +112,21 @@ app.post('/user', async (req, res) => {
 
 
 
+    let transformed = await transformCoachPhoto(existingRecords[0]);
 
+    // console.log('transformed')
+    // console.log(JSON.stringify(transformed))
 
     // If user exists, return the record
     if (existingRecords.length > 0) {
       res.send({
         status: 'ok',
-        data: existingRecords[0],
+        data: transformed,
       });
       return;
     }
+
+    console.log('transformed2')
 
     if (req.body.coachId !== null && req.body.coachId !== undefined && req.body.coachId !== '') {
       const newRecord = await base(REACT_APP_AIRTABLE_TABLE).create([
@@ -135,9 +142,11 @@ app.post('/user', async (req, res) => {
         }
       ]);
 
+      let transformed = await transformCoachPhoto(newRecord[0]);
+
       res.send({
         status: 'ok',
-        data: newRecord[0],
+        data: transformed,
       });
       return;
     } else {
@@ -152,9 +161,12 @@ app.post('/user', async (req, res) => {
           }
         }
       ]);
+
+      let transformed = await transformCoachPhoto(newRecord[0]);
+
       res.send({
         status: 'ok',
-        data: newRecord[0],
+        data: transformed,
       });
       return;
     }
@@ -172,6 +184,47 @@ app.post('/user', async (req, res) => {
   });
   return;
 });
+
+
+
+async function transformCoachPhoto(record) {
+
+  // If the record doesn't exist or doesn't have a coach_photo, return the record as-is
+  if (!record || !record.get('coach_photo') || !record.get('coach_photo')?.[0]?.url) {
+    return record;
+  }
+
+  try {
+    // Fetch the image
+    const response = await axios.get(record.get('coach_photo')[0].url, { 
+      responseType: 'arraybuffer' 
+    });
+
+    // Convert to base64
+    const base64Image = Buffer.from(response.data, 'binary').toString('base64');
+    
+    console.log('attempt4')
+
+    // Create a new object with the transformed photo
+
+    record.set('coach_photo', [{
+      base64: `data:image/jpeg;base64,${base64Image}`
+    }]);
+
+    return record;
+
+    // return {
+    //   ...record,
+    //   coach_photo: [{
+    //     base64: `data:image/jpeg;base64,${base64Image}`
+    //   }]
+    // };
+  } catch (error) {
+    console.error('Failed to transform coach photo:', error);
+    // Return original record if transformation fails
+    return record;
+  }
+}
 
 
 app.post('/update-coach', async (req, res) => {
