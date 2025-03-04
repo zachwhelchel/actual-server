@@ -956,6 +956,7 @@ async function savePlaidItemToAirtable(itemId, accessToken, userId) {
     let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
     let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
     let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+    let REACT_APP_AIRTABLE_ACCOUNT_FIELD = process.env.REACT_APP_AIRTABLE_ACCOUNT_FIELD;
 
 
 
@@ -983,9 +984,7 @@ async function savePlaidItemToAirtable(itemId, accessToken, userId) {
     
     // 2. Create the new PlaidItems record with the relationship
 
-    const tableName = REACT_APP_AIRTABLE_TABLE === "StageAccount" ? "stage_account" : "account"
-
-
+    const tableName = REACT_APP_AIRTABLE_ACCOUNT_FIELD
 
     // First, check if a record with this item_id already exists
     const existingRecords = await base('PlaidItems').select({

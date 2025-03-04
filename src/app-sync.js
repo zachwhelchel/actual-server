@@ -313,6 +313,10 @@ app.post('/update-user-filename', (req, res) => {
 app.get('/list-user-files', (req, res) => {
   const fileService = new FilesService(getAccountDb());
   const rows = fileService.find({ userId: res.locals.user_id });
+
+// console.log('list-user-files')
+// console.log(rows)
+
   res.send({
     status: 'ok',
     data: rows.map((row) => ({
