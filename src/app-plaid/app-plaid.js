@@ -651,7 +651,7 @@ app.post(
           const jsonString = record.get('user_ids_shared_with');
           
           // Parse the JSON string into an actual array
-          const idsArray = JSON.parse(jsonString);
+          const idsArray = jsonString ? JSON.parse(jsonString) : [];
           
           console.log("yolo")
 
@@ -668,8 +668,12 @@ app.post(
       });
 
       if (matchingRecords.length === 0) {
+                  console.log("yolo1")
+
         return res.status(200).json({ accounts: [] }); // No linked accounts yet
       }
+
+          console.log("yolo2")
 
       // Create a dictionary with item_id as key and access_token as value
       const plaidItemsDict = {};
