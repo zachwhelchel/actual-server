@@ -847,18 +847,49 @@ async function getTransactions(accountIds, bankId, startDate, plaidItemsDict, en
 
     const accountsArray = Array.from(allAccounts.values());
 
+
+    console.log("accountsArray")
+    // console.log(accountsArray)
+
+
     // Format response to match expected structure
+    // return {
+    //   accounts: accountsArray.map(account => ({
+    //     id: account.account_id,
+    //     name: account.name,
+    //     balance: account.balances.current.toString(),
+    //     currency: account.balances.iso_currency_code,
+    //   })),
+    //   transactions: allTransactions,
+    //   hasError: false,
+    //   errors: {}
+    // };
+
     return {
-      accounts: accountsArray.map(account => ({
-        id: account.account_id,
-        name: account.name,
-        balance: account.balances.current.toString(),
-        currency: account.balances.iso_currency_code,
-      })),
+      accounts: accountsArray.map(account => {
+        // Determine if the balance should be inverted based on account type
+        const shouldInvertBalance = account.type === "credit" || account.type === "loan";
+        
+        // Get the current balance and invert if necessary
+        const balance = shouldInvertBalance 
+          ? (-1 * account.balances.current).toString() 
+          : account.balances.current.toString();
+        
+        return {
+          id: account.account_id,
+          name: account.name,
+          balance: balance,
+          currency: account.balances.iso_currency_code,
+        };
+      }),
       transactions: allTransactions,
       hasError: false,
       errors: {}
     };
+
+
+
+
   } catch (error) {
     console.error('Error fetching transactions from Plaid:', error);
     
@@ -1026,13 +1057,9 @@ async function savePlaidItemToAirtable(itemId, accessToken, userId) {
     }
 
 
-
+    //not useful
     return {
-      success: true,
-      record: {
-        id: newRecord.id,
-        item_id: newRecord.fields.item_id
-      }
+      success: true
     };
   } catch (error) {
     console.error('Error saving Plaid item to Airtable:', error);

@@ -242,7 +242,7 @@ app.post('/update-coach', async (req, res) => {
   console.log(session.user_id)
 
   console.log('req.body.test')
-  console.log(req.body)
+  // console.log(req.body)
 
   let userId = session.user_id;
   let coachId = req.body.coachId;
@@ -305,7 +305,7 @@ app.post('/update-user', async (req, res) => {
   console.log(session.user_id)
 
   console.log('req.body.test')
-  console.log(req.body.first_name)
+  // console.log(req.body.first_name)
 
   let userId = session.user_id;
 
@@ -380,7 +380,7 @@ app.post('/update-local-storage-sync', async (req, res) => {
   console.log(session.user_id)
 
   console.log('req.body.test')
-  console.log(req.body.local_storage)
+  // console.log(req.body.local_storage)
 
   let userId = session.user_id;
 
