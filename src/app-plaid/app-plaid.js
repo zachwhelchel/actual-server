@@ -50,6 +50,9 @@ app.post('/api/create_link_token', async function (request, response) {
                        request.body.item_id !== null && 
                        request.body.item_id !== '';
   
+    console.log(`request.body: ${request.body}`);
+
+
   // Assign it only if it exists
   const item_id = itemIdExists ? request.body.item_id : null;
   
@@ -738,6 +741,9 @@ app.post(
       console.log('final response')
       //console.log(JSON.stringify(response))
 
+
+
+
       res.send({
         status: 'ok',
         data: response,
@@ -881,13 +887,16 @@ function getAccountResponse(results, accountId, startDate) {
     return;
   }
 
-  const startingBalance = parseInt((account.balance || '0').replace('.', ''));
+  const formattedBalance = parseFloat(account.balance).toFixed(2);
+
+
+  const startingBalance = parseInt((formattedBalance || '0').replace('.', ''));
   const date = getDate(new Date());
 
   const balances = [
     {
       balanceAmount: {
-        amount: account.balance,
+        amount: formattedBalance,
         currency: account.currency,
       },
       balanceType: 'expected',
@@ -895,7 +904,7 @@ function getAccountResponse(results, accountId, startDate) {
     },
     {
       balanceAmount: {
-        amount: account.balance,
+        amount: formattedBalance,
         currency: account.currency,
       },
       balanceType: 'interimAvailable',
@@ -920,7 +929,7 @@ function getAccountResponse(results, accountId, startDate) {
     newTrans.payeeName = trans.merchant_name || trans.name;
     newTrans.remittanceInformationUnstructured = trans.name;
     newTrans.transactionAmount = { 
-      amount: trans.amount.toString(), 
+      amount: trans.amount.toFixed(2), 
       currency: trans.iso_currency_code 
     };
     newTrans.transactionId = trans.transaction_id;

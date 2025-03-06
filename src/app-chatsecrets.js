@@ -74,9 +74,9 @@ app.post('/', async (req, res) => {
   const serverClient = StreamChat.getInstance(api_key, api_secret);
   // Create User Token
 
-      console.log("hawktua serverClient:" + serverClient)
+      console.log("hawktua serverClient:" + user_id)
 
-  const token = serverClient.createToken(user_id);
+const token = serverClient.createToken(Array.isArray(user_id) ? user_id[0] : user_id);
 
       console.log("hawktua token:" + token)
 
