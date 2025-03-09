@@ -7,9 +7,7 @@ import {
 import validateSession from './util/validate-user.js';
 import Airtable from 'airtable';
 
-import {
-  getUserInfo,
-} from './account-db.js';
+import { getUserInfo } from './account-db.js';
 
 import axios from 'axios';
 
@@ -19,8 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLoggerMiddleware);
 export { app as handlers };
 
-
-// app.get('/', 
+// app.get('/',
 //   (req, res, next) => {
 //     console.log("Before validateSessionMiddleware");
 //     next();
@@ -34,49 +31,43 @@ export { app as handlers };
 //     console.log("Sending dataaaaaa.");
 //     res.send({
 //       status: 'ok',
-//       data: { 
-//         data: 'data' 
+//       data: {
+//         data: 'data'
 //       },
 //     });
 //   }
 // );
 
-
-
 app.post('/user', async (req, res) => {
-
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
   let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
   let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
 
-  console.log("Sending dataaaaaa.");
+  console.log('Sending dataaaaaa.');
   //console.log(req);
 
   const session = validateSession(req, res);
 
-  console.log('session.user_id')
-  console.log(session.user_id)
+  console.log('session.user_id');
+  console.log(session.user_id);
 
   //console.log('req.body.test')
   //console.log(req.body)
 
   const base = new Airtable({
-    apiKey:REACT_APP_AIRTABLE_KEY
+    apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
   try {
     // First try to find the user
-    const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
-      filterByFormula: `{user_id} = '${session.user_id}'`
-    }).all();
+    const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+      .select({
+        filterByFormula: `{user_id} = '${session.user_id}'`,
+      })
+      .all();
 
-    console.log('existingRecords')
+    console.log('existingRecords');
     //console.log(userId)
-
-
-
-
-
 
     // If user doesn't exist, create new record
     // Ok here, creating a user for the first time... we want to:
@@ -84,9 +75,8 @@ app.post('/user', async (req, res) => {
     // set defaults for first/last/email
     // switch the proxy for the form to heard about us or something
     const user = getUserInfo(session.user_id);
-    console.log('getUserInfo')
-    console.log(user)
-
+    console.log('getUserInfo');
+    console.log(user);
 
     function splitDisplayName(displayName) {
       if (!displayName || typeof displayName !== 'string') {
@@ -95,13 +85,16 @@ app.post('/user', async (req, res) => {
 
       // Trim and split the name
       const parts = displayName.trim().split(/\s+/);
-      
+
       // Check if we have at least two parts that look like names
       // (no special characters, numbers, etc)
-      if (parts.length >= 2 && parts.every(part => /^[A-Za-z-']+$/.test(part))) {
+      if (
+        parts.length >= 2 &&
+        parts.every((part) => /^[A-Za-z-']+$/.test(part))
+      ) {
         return {
           firstName: parts[0],
-          lastName: parts.slice(1).join(' ') // Handles middle names as part of lastName
+          lastName: parts.slice(1).join(' '), // Handles middle names as part of lastName
         };
       }
 
@@ -109,8 +102,6 @@ app.post('/user', async (req, res) => {
     }
 
     const { firstName, lastName } = splitDisplayName(user.display_name);
-
-
 
     let transformed = await transformCoachPhoto(existingRecords[0]);
 
@@ -126,9 +117,13 @@ app.post('/user', async (req, res) => {
       return;
     }
 
-    console.log('transformed2')
+    console.log('transformed2');
 
-    if (req.body.coachId !== null && req.body.coachId !== undefined && req.body.coachId !== '') {
+    if (
+      req.body.coachId !== null &&
+      req.body.coachId !== undefined &&
+      req.body.coachId !== ''
+    ) {
       const newRecord = await base(REACT_APP_AIRTABLE_TABLE).create([
         {
           fields: {
@@ -137,9 +132,9 @@ app.post('/user', async (req, res) => {
             email: user.email,
             first_name: firstName,
             last_name: lastName,
-            coach: [params.coach]
-          }
-        }
+            coach: [params.coach],
+          },
+        },
       ]);
 
       let transformed = await transformCoachPhoto(newRecord[0]);
@@ -157,9 +152,9 @@ app.post('/user', async (req, res) => {
             auth0_id: user.user_name,
             email: user.email,
             first_name: firstName,
-            last_name: lastName
-          }
-        }
+            last_name: lastName,
+          },
+        },
       ]);
 
       let transformed = await transformCoachPhoto(newRecord[0]);
@@ -170,7 +165,6 @@ app.post('/user', async (req, res) => {
       });
       return;
     }
-
   } catch (error) {
     console.error('Error in findOrCreateUser:', error);
     throw error;
@@ -178,38 +172,41 @@ app.post('/user', async (req, res) => {
 
   res.send({
     status: 'ok',
-    data: { 
-      data: 'failed' 
+    data: {
+      data: 'failed',
     },
   });
   return;
 });
 
-
-
 async function transformCoachPhoto(record) {
-
   // If the record doesn't exist or doesn't have a coach_photo, return the record as-is
-  if (!record || !record.get('coach_photo') || !record.get('coach_photo')?.[0]?.url) {
+  if (
+    !record ||
+    !record.get('coach_photo') ||
+    !record.get('coach_photo')?.[0]?.url
+  ) {
     return record;
   }
 
   try {
     // Fetch the image
-    const response = await axios.get(record.get('coach_photo')[0].url, { 
-      responseType: 'arraybuffer' 
+    const response = await axios.get(record.get('coach_photo')[0].url, {
+      responseType: 'arraybuffer',
     });
 
     // Convert to base64
     const base64Image = Buffer.from(response.data, 'binary').toString('base64');
-    
-    console.log('attempt4')
+
+    console.log('attempt4');
 
     // Create a new object with the transformed photo
 
-    record.set('coach_photo', [{
-      base64: `data:image/jpeg;base64,${base64Image}`
-    }]);
+    record.set('coach_photo', [
+      {
+        base64: `data:image/jpeg;base64,${base64Image}`,
+      },
+    ]);
 
     return record;
 
@@ -226,38 +223,38 @@ async function transformCoachPhoto(record) {
   }
 }
 
-
 app.post('/update-coach', async (req, res) => {
-
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
   let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
   let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
 
-  console.log("Sending dataaaaaa.");
+  console.log('Sending dataaaaaa.');
   //console.log(req);
 
   const session = validateSession(req, res);
 
-  console.log('session.user_id')
-  console.log(session.user_id)
+  console.log('session.user_id');
+  console.log(session.user_id);
 
-  console.log('req.body.test')
+  console.log('req.body.test');
   // console.log(req.body)
 
   let userId = session.user_id;
   let coachId = req.body.coachId;
 
   const base = new Airtable({
-    apiKey:REACT_APP_AIRTABLE_KEY
+    apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
-  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
-    filterByFormula: `{user_id} = '${userId}'`
-  }).all();
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+    .select({
+      filterByFormula: `{user_id} = '${userId}'`,
+    })
+    .all();
 
   // If user exists, return the record
   if (existingRecords.length > 0) {
-    userId = existingRecords[0].id
+    userId = existingRecords[0].id;
   }
 
   try {
@@ -265,17 +262,16 @@ app.post('/update-coach', async (req, res) => {
       {
         id: userId,
         fields: {
-          coach: [coachId]
-        }
-      }
+          coach: [coachId],
+        },
+      },
     ]);
-    
+
     res.send({
       status: 'ok',
       data: updatedRecord[0],
     });
     return;
-
   } catch (error) {
     console.error('Error updating coach relationship:', error);
     throw error;
@@ -283,43 +279,43 @@ app.post('/update-coach', async (req, res) => {
 
   res.send({
     status: 'ok',
-    data: { 
-      data: 'failed' 
+    data: {
+      data: 'failed',
     },
   });
   return;
 });
 
-
 app.post('/update-user', async (req, res) => {
-
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
   let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
   let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
 
-  console.log("Sending dataaaaaa.");
+  console.log('Sending dataaaaaa.');
 
   const session = validateSession(req, res);
 
-  console.log('session.user_id')
-  console.log(session.user_id)
+  console.log('session.user_id');
+  console.log(session.user_id);
 
-  console.log('req.body.test')
+  console.log('req.body.test');
   // console.log(req.body.first_name)
 
   let userId = session.user_id;
 
   const base = new Airtable({
-    apiKey:REACT_APP_AIRTABLE_KEY
+    apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
-  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
-    filterByFormula: `{user_id} = '${session.user_id}'`
-  }).all();
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+    .select({
+      filterByFormula: `{user_id} = '${session.user_id}'`,
+    })
+    .all();
 
   // If user exists, return the record
   if (existingRecords.length > 0) {
-    userId = existingRecords[0].id
+    userId = existingRecords[0].id;
   }
 
   try {
@@ -339,17 +335,16 @@ app.post('/update-user', async (req, res) => {
           utm_medium: req.body.utm_medium,
           utm_source: req.body.utm_source,
           utm_term: req.body.utm_term,
-          utm_content: req.body.utm_content
-        }
-      }
+          utm_content: req.body.utm_content,
+        },
+      },
     ]);
-    
+
     res.send({
       status: 'ok',
       data: updatedRecord[0],
     });
     return;
-
   } catch (error) {
     console.error('Error updating user values:', error);
     throw error;
@@ -357,57 +352,55 @@ app.post('/update-user', async (req, res) => {
 
   res.send({
     status: 'ok',
-    data: { 
-      data: 'failed' 
+    data: {
+      data: 'failed',
     },
   });
   return;
 });
 
-
-
 app.post('/update-local-storage-sync', async (req, res) => {
-
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
   let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
   let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
 
-  console.log("Sending dataaaaaa.");
+  console.log('Sending dataaaaaa.');
 
   const session = validateSession(req, res);
 
-  console.log('session.user_id')
-  console.log(session.user_id)
+  console.log('session.user_id');
+  console.log(session.user_id);
 
-  console.log('req.body.test')
+  console.log('req.body.test');
   // console.log(req.body.local_storage)
 
   let userId = session.user_id;
 
   // Update record in Airtable
   const base = new Airtable({
-    apiKey:REACT_APP_AIRTABLE_KEY
+    apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
-
-  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
-    filterByFormula: `{user_id} = '${session.user_id}'`
-  }).all();
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+    .select({
+      filterByFormula: `{user_id} = '${session.user_id}'`,
+    })
+    .all();
 
   // If user exists, return the record
   if (existingRecords.length > 0) {
-    userId = existingRecords[0].id
+    userId = existingRecords[0].id;
   }
 
- // Update record in Airtable
+  // Update record in Airtable
   try {
     const response = await base(REACT_APP_AIRTABLE_TABLE).update([
       {
         id: userId,
         fields: {
-          'local_storage_sync': req.body.local_storage
-        }
-      }
+          local_storage_sync: req.body.local_storage,
+        },
+      },
     ]);
 
     res.send({
@@ -422,12 +415,11 @@ app.post('/update-local-storage-sync', async (req, res) => {
 
   res.send({
     status: 'ok',
-    data: { 
-      data: 'failed' 
+    data: {
+      data: 'failed',
     },
   });
   return;
 });
-
 
 app.use(errorMiddleware);
