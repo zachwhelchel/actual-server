@@ -52,6 +52,14 @@ app.post('/api/create_link_token', async function (request, response) {
   
     console.log(`request.body: ${request.body}`);
 
+    const plaidAccountFilters = {
+      depository: {
+        account_subtypes: ['all'],
+      },
+      credit: {
+        account_subtypes: ['all'],
+      },
+    };
 
   // Assign it only if it exists
   const item_id = itemIdExists ? request.body.item_id : null;
@@ -118,13 +126,11 @@ app.post('/api/create_link_token', async function (request, response) {
       redirect_uri: REACT_APP_PLAID_REDIRECT_URL,
       country_codes: ['US'],
       access_token: accessToken,
+      account_filters: plaidAccountFilters,
     };
-
   } else {
     // Code for when item_id doesn't exist
     console.log('No item_id provided');
-
-
     plaidRequest = {
       user: {
         // This should correspond to a unique id for the current user.
@@ -136,20 +142,12 @@ app.post('/api/create_link_token', async function (request, response) {
       webhook: 'https://webhook.example.com',
       redirect_uri: REACT_APP_PLAID_REDIRECT_URL,
       country_codes: ['US'],
+      account_filters: plaidAccountFilters,
     };
-
-
   }
 
-
-  console.log('create_link_token')
-
-  console.log('session.user_id')
-  console.log(session.user_id)
-
-
-
-
+  console.log('create_link_token');
+  console.log('session.user_id', session.user_id);
 
   try {
     const createTokenResponse = await plaidClient.linkTokenCreate(plaidRequest);
