@@ -267,31 +267,32 @@ app.post('/access', (req, res) => {
 
   UserService.addUserAccess(userAccess.userId, userAccess.fileId);
 
-  addToSharedUsers(session.user_id, userAccess.userId).catch(error => {
-    console.error("Error updating shared users:", error);
+  addToSharedUsers(session.user_id, userAccess.userId).catch((error) => {
+    console.error('Error updating shared users:', error);
   });
 
   res.status(200).send({ status: 'ok', data: {} });
 });
 
 async function addToSharedUsers(userId, userAccessId) {
-
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
   let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
   let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
 
   const base = new Airtable({
-    apiKey: REACT_APP_AIRTABLE_KEY
+    apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
-  
-  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
-    filterByFormula: `{user_id} = '${userId}'`
-  }).all();
-  
+
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+    .select({
+      filterByFormula: `{user_id} = '${userId}'`,
+    })
+    .all();
+
   if (existingRecords.length > 0) {
     userId = existingRecords[0].id;
     let user_ids_shared_with = existingRecords[0].fields.user_ids_shared_with;
-    
+
     // Convert the text to an actual array
     let sharedWithArray = [];
     try {
@@ -300,20 +301,20 @@ async function addToSharedUsers(userId, userAccessId) {
         sharedWithArray = JSON.parse(user_ids_shared_with);
       }
     } catch (error) {
-      console.error("Error parsing user_ids_shared_with:", error);
+      console.error('Error parsing user_ids_shared_with:', error);
       sharedWithArray = [];
     }
-    
+
     // Check if userAccess.userId exists in the array
     if (!sharedWithArray.includes(userAccessId)) {
       // Add the new ID to the array
       sharedWithArray.push(userAccessId);
-      
+
       // Update the record in Airtable
       await base(REACT_APP_AIRTABLE_TABLE).update(userId, {
-        "user_ids_shared_with": JSON.stringify(sharedWithArray)
+        user_ids_shared_with: JSON.stringify(sharedWithArray),
       });
-      
+
       console.log(`Added ${userAccessId} to shared users list`);
     } else {
       console.log(`User ${userAccessId} is already in the shared list`);
@@ -322,23 +323,24 @@ async function addToSharedUsers(userId, userAccessId) {
 }
 
 async function removeMultipleFromSharedUsers(userId, userAccessIdsToRemove) {
-
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
   let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
   let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
 
   const base = new Airtable({
-    apiKey: REACT_APP_AIRTABLE_KEY
+    apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
-  
-  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
-    filterByFormula: `{user_id} = '${userId}'`
-  }).all();
-  
+
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+    .select({
+      filterByFormula: `{user_id} = '${userId}'`,
+    })
+    .all();
+
   if (existingRecords.length > 0) {
     const recordId = existingRecords[0].id;
     let user_ids_shared_with = existingRecords[0].fields.user_ids_shared_with;
-    
+
     // Convert the text to an actual array
     let sharedWithArray = [];
     try {
@@ -347,34 +349,38 @@ async function removeMultipleFromSharedUsers(userId, userAccessIdsToRemove) {
         sharedWithArray = JSON.parse(user_ids_shared_with);
       }
     } catch (error) {
-      console.error("Error parsing user_ids_shared_with:", error);
+      console.error('Error parsing user_ids_shared_with:', error);
       sharedWithArray = [];
     }
-    
+
     // Keep track of which IDs were actually removed
     const removed = [];
-    
+
     // Filter out all userAccessIds that should be removed
-    const updatedArray = sharedWithArray.filter(id => {
+    const updatedArray = sharedWithArray.filter((id) => {
       const shouldRemove = userAccessIdsToRemove.includes(id);
       if (shouldRemove) {
         removed.push(id);
       }
       return !shouldRemove; // keep if not in the removal list
     });
-    
+
     // Only update if we actually removed something
     if (removed.length > 0) {
       // Update the record in Airtable
       await base(REACT_APP_AIRTABLE_TABLE).update(recordId, {
-        "user_ids_shared_with": JSON.stringify(updatedArray)
+        user_ids_shared_with: JSON.stringify(updatedArray),
       });
-      
-      console.log(`Removed ${removed.length} users from shared users list: ${removed.join(', ')}`);
+
+      console.log(
+        `Removed ${removed.length} users from shared users list: ${removed.join(
+          ', ',
+        )}`,
+      );
     } else {
       console.log(`None of the specified users were in the shared list`);
     }
-  }  
+  }
 }
 
 app.delete('/access', (req, res) => {
@@ -410,8 +416,8 @@ app.delete('/access', (req, res) => {
 
   const ids = req.body.ids;
 
-  removeMultipleFromSharedUsers(session.user_id, ids).catch(error => {
-    console.error("Error updating shared users:", error);
+  removeMultipleFromSharedUsers(session.user_id, ids).catch((error) => {
+    console.error('Error updating shared users:', error);
   });
 
   let totalDeleted = UserService.deleteUserAccessByFileId(ids, fileId);
@@ -461,45 +467,42 @@ app.get('/access/users', validateSessionMiddleware, async (req, res) => {
 
   const users = UserService.getAllUserAccess(fileId);
 
-
-//filter it down based on who you are...
-console.log('here we will filter')
-console.log(users)
-
+  //filter it down based on who you are...
+  console.log('here we will filter');
+  console.log(users);
 
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
   let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
   let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
 
-
   let allowedIds = [];
   allowedIds.push(session.user_id);
-  allowedIds.push("whateversupportendsupbeing");
+  allowedIds.push('whateversupportendsupbeing');
 
   const base = new Airtable({
-    apiKey:REACT_APP_AIRTABLE_KEY
+    apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
-  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE).select({
-    filterByFormula: `{user_id} = '${session.user_id}'`
-  }).all();
+  const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+    .select({
+      filterByFormula: `{user_id} = '${session.user_id}'`,
+    })
+    .all();
 
-  console.log('existingRecords')
-  console.log(existingRecords)
+  console.log('existingRecords');
+  console.log(existingRecords);
 
   if (existingRecords.length > 0) {
     if (existingRecords?.[0]?.get('coach_user_id')?.[0]) {
-        console.log(existingRecords)
+      console.log(existingRecords);
 
       allowedIds.push(existingRecords[0].get('coach_user_id')[0]);
     }
   }
 
-
-
-  const filteredUsers = users.filter(user => allowedIds.includes(user.userId) || user.haveAccess === 1);
-
-
+  const filteredUsers = users.filter(
+    (user) => allowedIds.includes(user.userId) || user.haveAccess === 1,
+  );
 
   res.json(filteredUsers);
 });

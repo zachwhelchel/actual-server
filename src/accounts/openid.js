@@ -124,7 +124,7 @@ export async function loginWithOpenIdSetup(returnUrl) {
     state,
     code_challenge,
     code_challenge_method: 'S256',
-    prompt: 'login'
+    prompt: 'login',
   });
 
   return { url };
@@ -197,8 +197,7 @@ export async function loginWithOpenIdFinalize(body) {
     //   userInfo.name ??
     //   'default-username';
 
-    const identity =
-      userInfo.sub;
+    const identity = userInfo.sub;
 
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
@@ -210,7 +209,7 @@ export async function loginWithOpenIdFinalize(body) {
         // Check if user already exists
         const existingUser = accountDb.first(
           'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
-          [identity]
+          [identity],
         );
 
         if (existingUser) {
@@ -218,17 +217,18 @@ export async function loginWithOpenIdFinalize(body) {
           if (!existingUser.display_name && userInfo.name) {
             accountDb.mutate('UPDATE users set display_name = ? WHERE id = ?', [
               userInfo.name,
-              existingUser.id
+              existingUser.id,
             ]);
           }
           userId = existingUser.id;
         } else {
           // Create new user
           userId = uuid.v4();
-          const isFirstUser = accountDb.first(
-            'SELECT count(*) as count FROM users WHERE user_name <> ?',
-            ['']
-          ).count === 0;
+          const isFirstUser =
+            accountDb.first(
+              'SELECT count(*) as count FROM users WHERE user_name <> ?',
+              [''],
+            ).count === 0;
 
           accountDb.mutate(
             'INSERT INTO users (id, user_name, display_name, email, enabled, owner, role) VALUES (?, ?, ?, ?, 1, ?, ?)',
@@ -238,8 +238,8 @@ export async function loginWithOpenIdFinalize(body) {
               userInfo.name ?? userInfo.email ?? identity,
               userInfo.email ?? '',
               isFirstUser ? 1 : 0,
-              isFirstUser ? 'ADMIN' : 'USER'
-            ]
+              isFirstUser ? 'ADMIN' : 'USER',
+            ],
           );
 
           // Transfer files if this is first user
