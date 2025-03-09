@@ -132,7 +132,7 @@ app.post('/user', async (req, res) => {
             email: user.email,
             first_name: firstName,
             last_name: lastName,
-            coach: [params.coach],
+            coach: [req.body.coachId],
           },
         },
       ]);
