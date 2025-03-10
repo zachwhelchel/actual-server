@@ -168,14 +168,14 @@ app.post('/api/exchange_public_token', async function (request, response) {
   const publicToken = request.body.public_token;
 
   try {
-    const response = await plaidClient.itemPublicTokenExchange({
+    const responsePlaid = await plaidClient.itemPublicTokenExchange({
       public_token: publicToken,
     });
 
     // These values should be saved to a persistent database and
     // associated with the currently signed-in user
-    const accessToken = response.data.access_token;
-    const itemID = response.data.item_id;
+    const accessToken = responsePlaid.data.access_token;
+    const itemID = responsePlaid.data.item_id;
 
     console.log('accessToken');
     console.log('itemID');
@@ -192,7 +192,14 @@ app.post('/api/exchange_public_token', async function (request, response) {
       session.user_id,
     );
 
-    res.json({ public_token_exchange: 'complete' });
+    // res.json({ public_token_exchange: 'complete' });
+
+    const results = {};
+
+    response.send({
+      status: 'ok',
+      data: results,
+    });
   } catch (error) {
     // handle error
 
