@@ -74,19 +74,19 @@ app.post('/login', (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
-app.post('/change-password', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) return;
+// app.post('/change-password', (req, res) => {
+//   let user = validateUser(req, res);
+//   if (!user) return;
 
-  let { error } = changePassword(req.body.password);
+//   let { error } = changePassword(req.body.password);
 
-  if (error) {
-    res.send({ status: 'error', reason: error });
-    return;
-  }
+//   if (error) {
+//     res.send({ status: 'error', reason: error });
+//     return;
+//   }
 
-  res.send({ status: 'ok', data: {} });
-});
+//   res.send({ status: 'ok', data: {} });
+// });
 
 app.get('/validate', (req, res) => {
   let user = validateUser(req, res);
