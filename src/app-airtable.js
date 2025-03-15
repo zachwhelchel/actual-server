@@ -299,7 +299,7 @@ app.post('/update-user', async (req, res) => {
   console.log(session.user_id);
 
   console.log('req.body.test');
-  // console.log(req.body.first_name)
+  //console.log(req.body)
 
   let userId = session.user_id;
 
@@ -326,6 +326,7 @@ app.post('/update-user', async (req, res) => {
           first_name: req.body.first_name,
           last_name: req.body.last_name,
           email: req.body.email,
+          phone_number: req.body.phone_number,
           found_us: req.body.found_us,
           motivation: req.body.motivation,
           language: req.body.language,
