@@ -19,11 +19,12 @@ export { app as handlers };
 
 // Define the Client type or class
 class Client {
-  constructor(recordId, name, status, statusExpiresAt) {
+  constructor(recordId, name, status, statusExpiresAt, joinedAt) {
     this.recordId = recordId;
     this.name = name;
     this.status = status;
     this.statusExpiresAt = statusExpiresAt;
+    this.joinedAt = joinedAt;
   }
 }
 
@@ -37,6 +38,9 @@ function transformToClientEntities(records) {
       fields.client_status,
       fields.client_status_expires_at
         ? fields.client_status_expires_at[0]
+        : null,
+      fields.client_joined_at
+        ? fields.client_joined_at[0]
         : null,
     );
   });
@@ -53,6 +57,7 @@ const AIRTABLE_FIELDS = {
     NAME: 'client_name',
     STATUS: 'client_status',
     STATUS_EXPIRES_AT: 'client_status_expires_at',
+    JOINED_AT: 'client_joined_at',
     COACH_USER_ID: 'client_coach_user_id',
   },
   USERS: {},
