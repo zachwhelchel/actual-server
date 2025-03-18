@@ -17,6 +17,48 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLoggerMiddleware);
 export { app as handlers };
 
+// Define the Client type or class
+class Client {
+  constructor(recordId, name, status, statusExpiresAt) {
+    this.recordId = recordId;
+    this.name = name;
+    this.status = status;
+    this.statusExpiresAt = statusExpiresAt;
+  }
+}
+
+// Function to transform Airtable records into Client entities
+function transformToClientEntities(records) {
+  return records.map((record) => {
+    const fields = record.fields;
+    return new Client(
+      record.id,
+      fields.client_name ? fields.client_name[0] : null,
+      fields.client_status,
+      fields.client_status_expires_at
+        ? fields.client_status_expires_at[0]
+        : null,
+    );
+  });
+}
+
+const AIRTABLE_TABLES = {
+  CLIENTS: 'Clients',
+  COACHES: 'Coaches',
+  USERS: 'Users',
+};
+
+const AIRTABLE_FIELDS = {
+  CLIENTS: {
+    NAME: 'client_name',
+    STATUS: 'client_status',
+    STATUS_EXPIRES_AT: 'client_status_expires_at',
+    COACH_USER_ID: 'client_coach_user_id',
+  },
+  USERS: {},
+  COACHES: {},
+};
+
 // app.get('/',
 //   (req, res, next) => {
 //     console.log("Before validateSessionMiddleware");
@@ -421,6 +463,56 @@ app.post('/update-local-storage-sync', async (req, res) => {
     },
   });
   return;
+});
+app.post('/clients', async function (request, response) {
+  try {
+    // Get the current user ID from the session
+
+    const session = validateSession(request, response);
+
+    console.log('session.user_id');
+    console.log(session.user_id);
+
+    const userId = session.user_id;
+
+    if (!userId) {
+      return response.status(401).json({ error: 'User not authenticated' });
+    }
+
+    // Set up Airtable connection
+
+    let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+    let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+    // Set up Airtable connection
+    const base = new Airtable({
+      apiKey: REACT_APP_AIRTABLE_KEY,
+    }).base(REACT_APP_AIRTABLE_BASE);
+
+    const clientRecords = await base(AIRTABLE_TABLES.CLIENTS)
+      .select({
+        filterByFormula: `FIND('${userId}', {${AIRTABLE_FIELDS.CLIENTS.COACH_USER_ID}})`,
+      })
+      .all();
+
+    // Transform records into Client entities
+    const clientEntities = transformToClientEntities(clientRecords);
+
+    console.log('clientEntities', clientEntities);
+
+    // Return all the clients
+    const results = {
+      clients: clientEntities,
+    };
+
+    response.send({
+      status: 'ok',
+      data: results,
+    });
+  } catch (error) {
+    console.error('Error fetching accounts:', error);
+    return response.status(500).json({ error: 'Failed to fetch accounts' });
+  }
 });
 
 app.use(errorMiddleware);
