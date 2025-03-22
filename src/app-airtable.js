@@ -105,6 +105,29 @@ app.post('/user', async (req, res) => {
     apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
+  function splitDisplayName(displayName) {
+    if (!displayName || typeof displayName !== 'string') {
+      return { firstName: null, lastName: null };
+    }
+
+    // Trim and split the name
+    const parts = displayName.trim().split(/\s+/);
+
+    // Check if we have at least two parts that look like names
+    // (no special characters, numbers, etc)
+    if (
+      parts.length >= 2 &&
+      parts.every((part) => /^[A-Za-z-']+$/.test(part))
+    ) {
+      return {
+        firstName: parts[0],
+        lastName: parts.slice(1).join(' '), // Handles middle names as part of lastName
+      };
+    }
+
+    return { firstName: null, lastName: null };
+  }
+
   try {
     // First try to find the user
     const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
@@ -124,29 +147,6 @@ app.post('/user', async (req, res) => {
     const user = getUserInfo(session.user_id);
     console.log('getUserInfo');
     console.log(user);
-
-    function splitDisplayName(displayName) {
-      if (!displayName || typeof displayName !== 'string') {
-        return { firstName: null, lastName: null };
-      }
-
-      // Trim and split the name
-      const parts = displayName.trim().split(/\s+/);
-
-      // Check if we have at least two parts that look like names
-      // (no special characters, numbers, etc)
-      if (
-        parts.length >= 2 &&
-        parts.every((part) => /^[A-Za-z-']+$/.test(part))
-      ) {
-        return {
-          firstName: parts[0],
-          lastName: parts.slice(1).join(' '), // Handles middle names as part of lastName
-        };
-      }
-
-      return { firstName: null, lastName: null };
-    }
 
     const { firstName, lastName } = splitDisplayName(user.display_name);
 
@@ -190,7 +190,6 @@ app.post('/user', async (req, res) => {
         status: 'ok',
         data: transformed,
       });
-      return;
     } else {
       const newRecord = await base(REACT_APP_AIRTABLE_TABLE).create([
         {
@@ -210,20 +209,11 @@ app.post('/user', async (req, res) => {
         status: 'ok',
         data: transformed,
       });
-      return;
     }
   } catch (error) {
     console.error('Error in findOrCreateUser:', error);
     throw error;
   }
-
-  res.send({
-    status: 'ok',
-    data: {
-      data: 'failed',
-    },
-  });
-  return;
 });
 
 async function transformCoachPhoto(record) {
@@ -318,19 +308,10 @@ app.post('/update-coach', async (req, res) => {
       status: 'ok',
       data: updatedRecord[0],
     });
-    return;
   } catch (error) {
     console.error('Error updating coach relationship:', error);
     throw error;
   }
-
-  res.send({
-    status: 'ok',
-    data: {
-      data: 'failed',
-    },
-  });
-  return;
 });
 
 app.post('/update-user', async (req, res) => {
@@ -392,19 +373,10 @@ app.post('/update-user', async (req, res) => {
       status: 'ok',
       data: updatedRecord[0],
     });
-    return;
   } catch (error) {
     console.error('Error updating user values:', error);
     throw error;
   }
-
-  res.send({
-    status: 'ok',
-    data: {
-      data: 'failed',
-    },
-  });
-  return;
 });
 
 app.post('/update-local-storage-sync', async (req, res) => {
@@ -455,19 +427,10 @@ app.post('/update-local-storage-sync', async (req, res) => {
       status: 'ok',
       data: response[0],
     });
-    return;
   } catch (error) {
     console.error('Error updating Airtable record:', error);
     throw error;
   }
-
-  res.send({
-    status: 'ok',
-    data: {
-      data: 'failed',
-    },
-  });
-  return;
 });
 app.post('/clients', async function (request, response) {
   try {
