@@ -105,6 +105,29 @@ app.post('/user', async (req, res) => {
     apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
+  function splitDisplayName(displayName) {
+    if (!displayName || typeof displayName !== 'string') {
+      return { firstName: null, lastName: null };
+    }
+
+    // Trim and split the name
+    const parts = displayName.trim().split(/\s+/);
+
+    // Check if we have at least two parts that look like names
+    // (no special characters, numbers, etc)
+    if (
+      parts.length >= 2 &&
+      parts.every((part) => /^[A-Za-z-']+$/.test(part))
+    ) {
+      return {
+        firstName: parts[0],
+        lastName: parts.slice(1).join(' '), // Handles middle names as part of lastName
+      };
+    }
+
+    return { firstName: null, lastName: null };
+  }
+
   try {
     // First try to find the user
     const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
@@ -124,29 +147,6 @@ app.post('/user', async (req, res) => {
     const user = getUserInfo(session.user_id);
     console.log('getUserInfo');
     console.log(user);
-
-    function splitDisplayName(displayName) {
-      if (!displayName || typeof displayName !== 'string') {
-        return { firstName: null, lastName: null };
-      }
-
-      // Trim and split the name
-      const parts = displayName.trim().split(/\s+/);
-
-      // Check if we have at least two parts that look like names
-      // (no special characters, numbers, etc)
-      if (
-        parts.length >= 2 &&
-        parts.every((part) => /^[A-Za-z-']+$/.test(part))
-      ) {
-        return {
-          firstName: parts[0],
-          lastName: parts.slice(1).join(' '), // Handles middle names as part of lastName
-        };
-      }
-
-      return { firstName: null, lastName: null };
-    }
 
     const { firstName, lastName } = splitDisplayName(user.display_name);
 
