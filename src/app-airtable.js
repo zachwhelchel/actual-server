@@ -19,8 +19,9 @@ export { app as handlers };
 
 // Define the Client type or class
 class Client {
-  constructor(recordId, name, status, statusExpiresAt, joinedAt) {
+  constructor(recordId, userId, name, status, statusExpiresAt, joinedAt) {
     this.recordId = recordId;
+    this.userId = userId;
     this.name = name;
     this.status = status;
     this.statusExpiresAt = statusExpiresAt;
@@ -34,6 +35,7 @@ function transformToClientEntities(records) {
     const fields = record.fields;
     return new Client(
       record.id,
+      fields.account_user_id ? fields.account_user_id[0] : null,
       fields.client_name ? fields.client_name[0] : null,
       fields.client_status,
       fields.client_status_expires_at
@@ -59,6 +61,7 @@ const AIRTABLE_FIELDS = {
     STATUS_EXPIRES_AT: 'client_status_expires_at',
     JOINED_AT: 'client_joined_at',
     COACH_USER_ID: 'client_coach_user_id',
+    USER_ID: 'account_user_id',
   },
   USERS: {},
   COACHES: {},
