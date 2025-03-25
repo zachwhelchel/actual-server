@@ -630,6 +630,7 @@ app.post('/sponsor-client', async (req, res) => {
   // If user exists, return the record
   if (existingUserRecords.length > 0) {
     const recordId = existingUserRecords[0].id;
+    const userId = existingUserRecords[0].get('user_id');
     let expiryDate = existingUserRecords[0].get('status_expires_at');
     let name = existingUserRecords[0].get('first_last_initial');
 
@@ -674,13 +675,16 @@ app.post('/sponsor-client', async (req, res) => {
         },
       ]);
 
+
+      const notes = name + ' ' + userId;
+
       const coachRecordId = existingCoachRecords[0].id;
       const newRecord = await base('Invoicing').create([
         {
           fields: {
             Account: [coachRecordId],
             Reason: reason,
-            Notes: name,
+            Notes: notes,
           },
         },
       ]);
