@@ -158,6 +158,7 @@ app.post('/user', async (req, res) => {
     // console.log('transformed')
     // console.log(JSON.stringify(transformed))
 
+
     // If user exists, return the record
     if (existingRecords.length > 0) {
       res.send({
@@ -207,6 +208,7 @@ app.post('/user', async (req, res) => {
       ]);
 
       let transformed = await transformCoachPhoto(newRecord[0]);
+
 
       res.send({
         status: 'ok',
@@ -485,5 +487,115 @@ app.post('/clients', async function (request, response) {
     return response.status(500).json({ error: 'Failed to fetch accounts' });
   }
 });
+
+app.post('/sponsor-client', async (req, res) => {
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+  console.log('Sending dataaaaaa.');
+  console.log(req.body.accountId);
+
+  const session = validateSession(req, res);
+
+  console.log('session.user_id');
+  console.log(session.user_id);
+
+  //console.log('req.body.test')
+  //console.log(req.body)
+
+  const base = new Airtable({
+    apiKey: REACT_APP_AIRTABLE_KEY,
+  }).base(REACT_APP_AIRTABLE_BASE);
+
+
+  const existingUserRecords = await base(REACT_APP_AIRTABLE_TABLE)
+    .select({
+      filterByFormula: `{user_id} = '${req.body.accountId}'`,
+    })
+    .all();
+
+  const existingCoachRecords = await base(REACT_APP_AIRTABLE_TABLE)
+    .select({
+      filterByFormula: `{user_id} = '${session.user_id}'`,
+    })
+    .all();
+
+
+  // If user exists, return the record
+  if (existingUserRecords.length > 0) {
+
+    const recordId = existingUserRecords[0].id;
+    let expiryDate = existingUserRecords[0].get('status_expires_at');
+    let name = existingUserRecords[0].get('first_last_initial');
+
+    // If no date exists, create today's date in YYYY-MM-DD format
+    if (!expiryDate) {
+      const today = new Date();
+      expiryDate = today.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    }
+
+    // Parse the string date, ensuring we preserve the day
+    let dateParts = expiryDate.split('-'); // Split YYYY-MM-DD
+    let dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+    let reason = null;
+
+
+    // Add time based on sponsorship length
+    if (req.body.sponsorshipLength === "1_month") {
+      dateObj.setMonth(dateObj.getMonth() + 1);
+      reason = "sponsored_client_1_month";
+    } else if (req.body.sponsorshipLength === "3_months") {
+      dateObj.setMonth(dateObj.getMonth() + 3);
+      reason = "sponsored_client_3_months";
+    } else if (req.body.sponsorshipLength === "5_months") {
+      dateObj.setMonth(dateObj.getMonth() + 5);
+      reason = "sponsored_client_5_months";
+    } else if (req.body.sponsorshipLength === "1_year") {
+      dateObj.setFullYear(dateObj.getFullYear() + 1);
+      reason = "sponsored_client_1_year";
+    }
+
+    // Convert back to YYYY-MM-DD string format
+    const newExpiryDate = dateObj.toLocaleDateString('en-CA');
+
+    try {
+      const updatedRecord = await base(REACT_APP_AIRTABLE_TABLE).update([
+        {
+          id: recordId,
+          fields: {
+            status_expires_at: newExpiryDate,
+            status: 'sponsored',
+          },
+        },
+      ]);
+
+      const coachRecordId = existingCoachRecords[0].id;
+      const newRecord = await base("Invoicing").create([
+        {
+          fields: {
+            Account: [coachRecordId],
+            Reason: reason,
+            Notes: name,
+          },
+        },
+      ]);
+
+      res.send({
+        status: 'ok',
+        data: updatedRecord[0],
+      });
+    } catch (error) {
+      console.error('Error updating user values:', error);
+      throw error;
+    }
+
+  }
+});
+
+
+
+
 
 app.use(errorMiddleware);
