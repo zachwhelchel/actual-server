@@ -19,13 +19,26 @@ export { app as handlers };
 
 // Define the Client type or class
 class Client {
-  constructor(recordId, userId, name, status, statusExpiresAt, joinedAt) {
+  constructor(
+    recordId,
+    userId,
+    coachUserId,
+    userIdsSharedWith,
+    name,
+    status,
+    statusExpiresAt,
+    joinedAt,
+    lastShareRequestedAt,
+  ) {
     this.recordId = recordId;
     this.userId = userId;
+    this.coachUserId = coachUserId;
+    this.userIdsSharedWith = userIdsSharedWith;
     this.name = name;
     this.status = status;
     this.statusExpiresAt = statusExpiresAt;
     this.joinedAt = joinedAt;
+    this.lastShareRequestedAt = lastShareRequestedAt;
   }
 }
 
@@ -36,14 +49,15 @@ function transformToClientEntities(records) {
     return new Client(
       record.id,
       fields.account_user_id ? fields.account_user_id[0] : null,
+      fields.client_coach_user_id ? fields.client_coach_user_id[0] : null,
+      fields.user_ids_shared_with ? fields.user_ids_shared_with[0] : [],
       fields.client_name ? fields.client_name[0] : null,
       fields.client_status,
       fields.client_status_expires_at
         ? fields.client_status_expires_at[0]
         : null,
-      fields.client_joined_at
-        ? fields.client_joined_at[0]
-        : null,
+      fields.client_joined_at ? fields.client_joined_at[0] : null,
+      fields.last_share_requested_at ? fields.last_share_requested_at : null,
     );
   });
 }
@@ -62,6 +76,8 @@ const AIRTABLE_FIELDS = {
     JOINED_AT: 'client_joined_at',
     COACH_USER_ID: 'client_coach_user_id',
     USER_ID: 'account_user_id',
+    USER_IDS_SHARED_WITH: 'account_user_ids_shared_with',
+    LAST_SHARE_REQUESTED_AT: 'last_share_requested_at',
   },
   USERS: {},
   COACHES: {},
@@ -384,6 +400,71 @@ app.post('/update-user', async (req, res) => {
   }
 });
 
+app.post('/invite-to-share', async (req, res) => {
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+  const session = validateSession(req, res);
+
+  console.log('[airtable][invite-to-share] session.user_id', session.user_id);
+
+  let clientUserId = req.body.clientUserId;
+  let coachUserId = req.body.coachUserId;
+  console.log('[airtable][invite-to-share] clientUserId', clientUserId);
+  console.log('[airtable][invite-to-share] coachUserId', coachUserId);
+  if (coachUserId != session.user_id) {
+    throw new Error(
+      '[airtable][invite-to-share] Unauthorized access, session user_id does not match coach user_id',
+    );
+  }
+
+  const base = new Airtable({
+    apiKey: REACT_APP_AIRTABLE_KEY,
+  }).base(REACT_APP_AIRTABLE_BASE);
+
+  const existingRecords = await base(AIRTABLE_TABLES.CLIENTS)
+    .select({
+      filterByFormula: `{account_user_id} = '${clientUserId}'`,
+    })
+    .all();
+
+  // If too many matches, then the data is ambiguous
+  if (existingRecords.length > 1) {
+    throw new Error('[airtable][invite-to-share] Ambiguous client user_id');
+  }
+
+  let clientId;
+  // If client exists, return the record
+  if (existingRecords.length > 0) {
+    clientId = existingRecords[0].id;
+  } else {
+    throw new Error('[airtable][invite-to-share] Invalid client user_id');
+  }
+
+  try {
+    const currentDate = new Date().toISOString().split('T')[0];
+    const updatedRecord = await base(AIRTABLE_TABLES.CLIENTS).update([
+      {
+        id: clientId,
+        fields: {
+          last_share_requested_at: currentDate,
+        },
+      },
+    ]);
+
+    res.send({
+      status: 'ok',
+      data: updatedRecord[0],
+    });
+  } catch (error) {
+    console.error(
+      '[airtable][invite-to-share] Error updating last_share_requested_at:',
+      error,
+    );
+    throw error;
+  }
+});
+
 app.post('/update-local-storage-sync', async (req, res) => {
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
   let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
@@ -453,7 +534,6 @@ app.post('/clients', async function (request, response) {
     }
 
     // Set up Airtable connection
-
     let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
     let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
 
