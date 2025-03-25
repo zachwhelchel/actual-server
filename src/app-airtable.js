@@ -42,26 +42,6 @@ class Client {
   }
 }
 
-// Function to transform Airtable records into Client entities
-function transformToClientEntities(records) {
-  return records.map((record) => {
-    const fields = record.fields;
-    return new Client(
-      record.id,
-      fields.account_user_id ? fields.account_user_id[0] : null,
-      fields.client_coach_user_id ? fields.client_coach_user_id[0] : null,
-      fields.user_ids_shared_with ? fields.user_ids_shared_with[0] : [],
-      fields.client_name ? fields.client_name[0] : null,
-      fields.client_status,
-      fields.client_status_expires_at
-        ? fields.client_status_expires_at[0]
-        : null,
-      fields.client_joined_at ? fields.client_joined_at[0] : null,
-      fields.last_share_requested_at ? fields.last_share_requested_at : null,
-    );
-  });
-}
-
 const AIRTABLE_TABLES = {
   CLIENTS: 'Clients',
   COACHES: 'Coaches',
@@ -82,6 +62,55 @@ const AIRTABLE_FIELDS = {
   USERS: {},
   COACHES: {},
 };
+
+// Function to transform Airtable records into Client entities
+function transformToClientEntities(records) {
+  return records.map((record) => {
+    const fields = record.fields;
+    // USER_IDS_SHARED_WITH that looks like an array in Airtable is a JSON string representation of an Array.
+    let parsedSharedWith;
+    try {
+      parsedSharedWith =
+        fields[AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH] &&
+        fields[AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH].length
+          ? JSON.parse(fields[AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH][0])
+          : [];
+    } catch (error) {
+      console.log(
+        `Error parsing ${AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH}:`,
+        fields[AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH],
+        error,
+      );
+      parsedSharedWith = [];
+    }
+
+    // Whether we need to dereference with [0] depends on
+    //  if the data is a Lookup field into another table.
+    return new Client(
+      record.id,
+      fields[AIRTABLE_FIELDS.CLIENTS.USER_ID]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.USER_ID][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.COACH_USER_ID]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.COACH_USER_ID][0]
+        : null,
+      parsedSharedWith.length ? parsedSharedWith : [],
+      fields[AIRTABLE_FIELDS.CLIENTS.NAME]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.NAME][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.STATUS],
+      fields[AIRTABLE_FIELDS.CLIENTS.STATUS_EXPIRES_AT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.STATUS_EXPIRES_AT][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.JOINED_AT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.JOINED_AT][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_SHARE_REQUESTED_AT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_SHARE_REQUESTED_AT]
+        : null,
+    );
+  });
+}
 
 // app.get('/',
 //   (req, res, next) => {
@@ -174,7 +203,6 @@ app.post('/user', async (req, res) => {
     // console.log('transformed')
     // console.log(JSON.stringify(transformed))
 
-
     // If user exists, return the record
     if (existingRecords.length > 0) {
       res.send({
@@ -224,7 +252,6 @@ app.post('/user', async (req, res) => {
       ]);
 
       let transformed = await transformCoachPhoto(newRecord[0]);
-
 
       res.send({
         status: 'ok',
@@ -588,7 +615,6 @@ app.post('/sponsor-client', async (req, res) => {
     apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
-
   const existingUserRecords = await base(REACT_APP_AIRTABLE_TABLE)
     .select({
       filterByFormula: `{user_id} = '${req.body.accountId}'`,
@@ -601,10 +627,8 @@ app.post('/sponsor-client', async (req, res) => {
     })
     .all();
 
-
   // If user exists, return the record
   if (existingUserRecords.length > 0) {
-
     const recordId = existingUserRecords[0].id;
     let expiryDate = existingUserRecords[0].get('status_expires_at');
     let name = existingUserRecords[0].get('first_last_initial');
@@ -621,20 +645,19 @@ app.post('/sponsor-client', async (req, res) => {
 
     let reason = null;
 
-
     // Add time based on sponsorship length
-    if (req.body.sponsorshipLength === "1_month") {
+    if (req.body.sponsorshipLength === '1_month') {
       dateObj.setMonth(dateObj.getMonth() + 1);
-      reason = "sponsored_client_1_month";
-    } else if (req.body.sponsorshipLength === "3_months") {
+      reason = 'sponsored_client_1_month';
+    } else if (req.body.sponsorshipLength === '3_months') {
       dateObj.setMonth(dateObj.getMonth() + 3);
-      reason = "sponsored_client_3_months";
-    } else if (req.body.sponsorshipLength === "5_months") {
+      reason = 'sponsored_client_3_months';
+    } else if (req.body.sponsorshipLength === '5_months') {
       dateObj.setMonth(dateObj.getMonth() + 5);
-      reason = "sponsored_client_5_months";
-    } else if (req.body.sponsorshipLength === "1_year") {
+      reason = 'sponsored_client_5_months';
+    } else if (req.body.sponsorshipLength === '1_year') {
       dateObj.setFullYear(dateObj.getFullYear() + 1);
-      reason = "sponsored_client_1_year";
+      reason = 'sponsored_client_1_year';
     }
 
     // Convert back to YYYY-MM-DD string format
@@ -652,7 +675,7 @@ app.post('/sponsor-client', async (req, res) => {
       ]);
 
       const coachRecordId = existingCoachRecords[0].id;
-      const newRecord = await base("Invoicing").create([
+      const newRecord = await base('Invoicing').create([
         {
           fields: {
             Account: [coachRecordId],
@@ -670,12 +693,7 @@ app.post('/sponsor-client', async (req, res) => {
       console.error('Error updating user values:', error);
       throw error;
     }
-
   }
 });
-
-
-
-
 
 app.use(errorMiddleware);
