@@ -203,7 +203,6 @@ app.post('/user', async (req, res) => {
     // console.log('transformed')
     // console.log(JSON.stringify(transformed))
 
-
     // If user exists, return the record
     if (existingRecords.length > 0) {
       res.send({
@@ -253,7 +252,6 @@ app.post('/user', async (req, res) => {
       ]);
 
       let transformed = await transformCoachPhoto(newRecord[0]);
-
 
       res.send({
         status: 'ok',
@@ -617,7 +615,6 @@ app.post('/sponsor-client', async (req, res) => {
     apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
 
-
   const existingUserRecords = await base(REACT_APP_AIRTABLE_TABLE)
     .select({
       filterByFormula: `{user_id} = '${req.body.accountId}'`,
@@ -630,10 +627,8 @@ app.post('/sponsor-client', async (req, res) => {
     })
     .all();
 
-
   // If user exists, return the record
   if (existingUserRecords.length > 0) {
-
     const recordId = existingUserRecords[0].id;
     let expiryDate = existingUserRecords[0].get('status_expires_at');
     let name = existingUserRecords[0].get('first_last_initial');
@@ -650,20 +645,19 @@ app.post('/sponsor-client', async (req, res) => {
 
     let reason = null;
 
-
     // Add time based on sponsorship length
-    if (req.body.sponsorshipLength === "1_month") {
+    if (req.body.sponsorshipLength === '1_month') {
       dateObj.setMonth(dateObj.getMonth() + 1);
-      reason = "sponsored_client_1_month";
-    } else if (req.body.sponsorshipLength === "3_months") {
+      reason = 'sponsored_client_1_month';
+    } else if (req.body.sponsorshipLength === '3_months') {
       dateObj.setMonth(dateObj.getMonth() + 3);
-      reason = "sponsored_client_3_months";
-    } else if (req.body.sponsorshipLength === "5_months") {
+      reason = 'sponsored_client_3_months';
+    } else if (req.body.sponsorshipLength === '5_months') {
       dateObj.setMonth(dateObj.getMonth() + 5);
-      reason = "sponsored_client_5_months";
-    } else if (req.body.sponsorshipLength === "1_year") {
+      reason = 'sponsored_client_5_months';
+    } else if (req.body.sponsorshipLength === '1_year') {
       dateObj.setFullYear(dateObj.getFullYear() + 1);
-      reason = "sponsored_client_1_year";
+      reason = 'sponsored_client_1_year';
     }
 
     // Convert back to YYYY-MM-DD string format
@@ -681,7 +675,7 @@ app.post('/sponsor-client', async (req, res) => {
       ]);
 
       const coachRecordId = existingCoachRecords[0].id;
-      const newRecord = await base("Invoicing").create([
+      const newRecord = await base('Invoicing').create([
         {
           fields: {
             Account: [coachRecordId],
@@ -699,12 +693,7 @@ app.post('/sponsor-client', async (req, res) => {
       console.error('Error updating user values:', error);
       throw error;
     }
-
   }
 });
-
-
-
-
 
 app.use(errorMiddleware);
