@@ -42,26 +42,6 @@ class Client {
   }
 }
 
-// Function to transform Airtable records into Client entities
-function transformToClientEntities(records) {
-  return records.map((record) => {
-    const fields = record.fields;
-    return new Client(
-      record.id,
-      fields.account_user_id ? fields.account_user_id[0] : null,
-      fields.client_coach_user_id ? fields.client_coach_user_id[0] : null,
-      fields.user_ids_shared_with ? fields.user_ids_shared_with[0] : [],
-      fields.client_name ? fields.client_name[0] : null,
-      fields.client_status,
-      fields.client_status_expires_at
-        ? fields.client_status_expires_at[0]
-        : null,
-      fields.client_joined_at ? fields.client_joined_at[0] : null,
-      fields.last_share_requested_at ? fields.last_share_requested_at : null,
-    );
-  });
-}
-
 const AIRTABLE_TABLES = {
   CLIENTS: 'Clients',
   COACHES: 'Coaches',
@@ -82,6 +62,55 @@ const AIRTABLE_FIELDS = {
   USERS: {},
   COACHES: {},
 };
+
+// Function to transform Airtable records into Client entities
+function transformToClientEntities(records) {
+  return records.map((record) => {
+    const fields = record.fields;
+    // USER_IDS_SHARED_WITH that looks like an array in Airtable is a JSON string representation of an Array.
+    let parsedSharedWith;
+    try {
+      parsedSharedWith =
+        fields[AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH] &&
+        fields[AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH].length
+          ? JSON.parse(fields[AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH][0])
+          : [];
+    } catch (error) {
+      console.log(
+        `Error parsing ${AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH}:`,
+        fields[AIRTABLE_FIELDS.CLIENTS.USER_IDS_SHARED_WITH],
+        error,
+      );
+      parsedSharedWith = [];
+    }
+
+    // Whether we need to dereference with [0] depends on
+    //  if the data is a Lookup field into another table.
+    return new Client(
+      record.id,
+      fields[AIRTABLE_FIELDS.CLIENTS.USER_ID]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.USER_ID][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.COACH_USER_ID]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.COACH_USER_ID][0]
+        : null,
+      parsedSharedWith.length ? parsedSharedWith : [],
+      fields[AIRTABLE_FIELDS.CLIENTS.NAME]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.NAME][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.STATUS],
+      fields[AIRTABLE_FIELDS.CLIENTS.STATUS_EXPIRES_AT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.STATUS_EXPIRES_AT][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.JOINED_AT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.JOINED_AT][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_SHARE_REQUESTED_AT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_SHARE_REQUESTED_AT]
+        : null,
+    );
+  });
+}
 
 // app.get('/',
 //   (req, res, next) => {
