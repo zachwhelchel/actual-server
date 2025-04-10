@@ -417,10 +417,12 @@ app.post('/update-user', async (req, res) => {
       },
     ]);
 
+    let transformed = await transformCoachPhoto(updatedRecord[0]);
     res.send({
       status: 'ok',
-      data: updatedRecord[0],
+      data: transformed,
     });
+    
   } catch (error) {
     console.error('Error updating user values:', error);
     throw error;
