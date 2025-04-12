@@ -406,6 +406,7 @@ app.post('/update-user', async (req, res) => {
           found_us: req.body.found_us,
           motivation: req.body.motivation,
           language: req.body.language,
+          share_contact_with_coach: req.body.share_contact_with_coach,
           fprom_tid: req.body.fprom_tid,
           fprom_ref: req.body.fprom_ref,
           utm_campaign: req.body.utm_campaign,
