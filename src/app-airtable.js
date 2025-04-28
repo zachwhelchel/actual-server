@@ -43,6 +43,7 @@ class Client {
 }
 
 const AIRTABLE_TABLES = {
+  ACCOUNTS: 'Accounts',
   CLIENTS: 'Clients',
   COACHES: 'Coaches',
   USERS: 'Users',
@@ -58,6 +59,15 @@ const AIRTABLE_FIELDS = {
     USER_ID: 'account_user_id',
     USER_IDS_SHARED_WITH: 'account_user_ids_shared_with',
     LAST_SHARE_REQUESTED_AT: 'last_share_requested_at',
+  },
+  NEW_CLIENT: {
+    FIRST_NAME: 'non_account_first',
+    LAST_NAME: 'non_account_last',
+    EMAIL: 'non_account_email',
+    PHONE: 'non_account_phone_number',
+    STATUS: 'non_account_status',
+    COACH_NOTES: 'coach_notes',
+    NON_ACCOUNT_COACH: 'non_account_coach',
   },
   USERS: {},
   COACHES: {},
@@ -545,6 +555,8 @@ app.post('/update-local-storage-sync', async (req, res) => {
     throw error;
   }
 });
+
+// API Route: /airtable/clients
 app.post('/clients', async function (request, response) {
   try {
     // Get the current user ID from the session
@@ -592,6 +604,84 @@ app.post('/clients', async function (request, response) {
   } catch (error) {
     console.error('Error fetching accounts:', error);
     return response.status(500).json({ error: 'Failed to fetch accounts' });
+  }
+});
+
+// API Route: /airtable/create-client
+app.post('/create-client', async function (request, response) {
+  try {
+    // Get the current user ID from the session
+
+    const session = validateSession(request, response);
+
+    console.log('session.user_id');
+    console.log(session.user_id);
+
+    const userId = session.user_id;
+
+    if (!userId) {
+      return response.status(401).json({ error: 'User not authenticated' });
+    }
+
+    console.log(request.body);
+    const firstName = request.body.firstName;
+    const lastName = request.body.lastName;
+    const email = request.body.email;
+    const phone = request.body.phone;
+    const status = request.body.status;
+    const coachNotes = request.body.coachNotes;
+
+    // Set up Airtable connection
+    let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+    let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+    // Set up Airtable connection
+    const base = new Airtable({
+      apiKey: REACT_APP_AIRTABLE_KEY,
+    }).base(REACT_APP_AIRTABLE_BASE);
+
+    const existingCoachRecords = await base(AIRTABLE_TABLES.COACHES)
+      .select({
+        filterByFormula: `{Associated Account User Id} = '${userId}'`,
+      })
+      .all();
+
+    let coachRecordId;
+    // If user exists, return the record
+    if (existingCoachRecords.length > 0) {
+      coachRecordId = existingCoachRecords[0].id;
+    }
+
+    if (!coachRecordId) {
+      return response.status(401).json({ error: 'Coach record not found' });
+    }
+
+    const newRecord = await base(AIRTABLE_TABLES.CLIENTS).create([
+      {
+        fields: {
+          [AIRTABLE_FIELDS.NEW_CLIENT.FIRST_NAME]: firstName,
+          [AIRTABLE_FIELDS.NEW_CLIENT.LAST_NAME]: lastName,
+          [AIRTABLE_FIELDS.NEW_CLIENT.EMAIL]: email,
+          [AIRTABLE_FIELDS.NEW_CLIENT.PHONE]: phone,
+          [AIRTABLE_FIELDS.NEW_CLIENT.STATUS]: status,
+          [AIRTABLE_FIELDS.NEW_CLIENT.COACH_NOTES]: coachNotes,
+          [AIRTABLE_FIELDS.NEW_CLIENT.NON_ACCOUNT_COACH]: [coachRecordId],
+        },
+      },
+    ]);
+
+    // Return the new client
+    const results = {
+      client: newRecord,
+    };
+
+    response.send({
+      status: 'ok',
+      data: results,
+    });
+  } catch (error) {
+    console.error('Error creating client:', error);
+    return response.status(500).json({ error: 'Failed to create client' });
   }
 });
 
@@ -674,7 +764,6 @@ app.post('/sponsor-client', async (req, res) => {
           },
         },
       ]);
-
 
       const notes = name + ' ' + userId;
 
