@@ -29,6 +29,9 @@ class Client {
     statusExpiresAt,
     joinedAt,
     lastShareRequestedAt,
+    email,
+    phone,
+    coachNotes,
   ) {
     this.recordId = recordId;
     this.userId = userId;
@@ -39,6 +42,9 @@ class Client {
     this.statusExpiresAt = statusExpiresAt;
     this.joinedAt = joinedAt;
     this.lastShareRequestedAt = lastShareRequestedAt;
+    this.email = email;
+    this.phone = phone;
+    this.coachNotes = coachNotes;
   }
 }
 
@@ -59,6 +65,9 @@ const AIRTABLE_FIELDS = {
     USER_ID: 'account_user_id',
     USER_IDS_SHARED_WITH: 'account_user_ids_shared_with',
     LAST_SHARE_REQUESTED_AT: 'last_share_requested_at',
+    EMAIL: 'client_email',
+    PHONE: 'client_phone_number',
+    COACH_NOTES: 'coach_notes',
   },
   NEW_CLIENT: {
     FIRST_NAME: 'non_account_first',
@@ -106,7 +115,9 @@ function transformToClientEntities(records) {
         : null,
       parsedSharedWith.length ? parsedSharedWith : [],
       fields[AIRTABLE_FIELDS.CLIENTS.NAME]
-        ? fields[AIRTABLE_FIELDS.CLIENTS.NAME][0]
+        ? (Array.isArray(fields[AIRTABLE_FIELDS.CLIENTS.NAME]) 
+            ? fields[AIRTABLE_FIELDS.CLIENTS.NAME][0] 
+            : fields[AIRTABLE_FIELDS.CLIENTS.NAME])
         : null,
       fields[AIRTABLE_FIELDS.CLIENTS.STATUS],
       fields[AIRTABLE_FIELDS.CLIENTS.STATUS_EXPIRES_AT]
@@ -117,6 +128,15 @@ function transformToClientEntities(records) {
         : null,
       fields[AIRTABLE_FIELDS.CLIENTS.LAST_SHARE_REQUESTED_AT]
         ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_SHARE_REQUESTED_AT]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.EMAIL]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.EMAIL]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.PHONE]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.PHONE]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.COACH_NOTES]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.COACH_NOTES]
         : null,
     );
   });
@@ -607,6 +627,115 @@ app.post('/clients', async function (request, response) {
   } catch (error) {
     console.error('Error fetching accounts:', error);
     return response.status(500).json({ error: 'Failed to fetch accounts' });
+  }
+});
+
+//could be tightened up to check you are the coach for this client first.
+app.post('/update-internal-client', async (req, res) => {
+
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+  const session = validateSession(req, res);
+
+  const base = new Airtable({
+    apiKey: REACT_APP_AIRTABLE_KEY,
+  }).base(REACT_APP_AIRTABLE_BASE);
+
+  try {
+    const updatedRecord = await base(AIRTABLE_TABLES.CLIENTS).update([
+      {
+        id: req.body.clientId,
+        fields: {
+          coach_notes: req.body.coachNotes,
+        },
+      },
+    ]);
+
+    res.send({
+      status: 'ok',
+    });
+    
+  } catch (error) {
+    console.error('Error updating client values:', error);
+    throw error;
+  }
+});
+
+//could be tightened up to check you are the coach for this client first.
+app.post('/update-external-client', async (req, res) => {
+
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+  const session = validateSession(req, res);
+
+  const base = new Airtable({
+    apiKey: REACT_APP_AIRTABLE_KEY,
+  }).base(REACT_APP_AIRTABLE_BASE);
+
+  console.log(req.body);
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const email = req.body.email;
+  const phone = req.body.phone;
+  const status = req.body.status;
+  const coachNotes = req.body.coachNotes;
+
+  try {
+    const updatedRecord = await base(AIRTABLE_TABLES.CLIENTS).update([
+      {
+        id: req.body.clientId,
+        fields: {
+          [AIRTABLE_FIELDS.NEW_CLIENT.FIRST_NAME]: firstName,
+          [AIRTABLE_FIELDS.NEW_CLIENT.LAST_NAME]: lastName,
+          [AIRTABLE_FIELDS.NEW_CLIENT.EMAIL]: email,
+          [AIRTABLE_FIELDS.NEW_CLIENT.PHONE]: phone,
+          [AIRTABLE_FIELDS.NEW_CLIENT.STATUS]: status,
+          [AIRTABLE_FIELDS.NEW_CLIENT.COACH_NOTES]: coachNotes,
+        },
+      },
+    ]);
+
+    res.send({
+      status: 'ok',
+    });
+    
+  } catch (error) {
+    console.error('Error updating client values:', error);
+    throw error;
+  }
+});
+
+//could be tightened up to check you are the coach for this client first.
+app.post('/delete-external-client', async (req, res) => {
+
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+  const session = validateSession(req, res);
+
+  const base = new Airtable({
+    apiKey: REACT_APP_AIRTABLE_KEY,
+  }).base(REACT_APP_AIRTABLE_BASE);
+
+  console.log(req.body);
+
+  try {
+    const deletedRecord = await base(AIRTABLE_TABLES.CLIENTS).destroy([
+      req.body.clientId
+    ]);
+
+    res.send({
+      status: 'ok',
+    });
+    
+  } catch (error) {
+    console.error('Error updating client values:', error);
+    throw error;
   }
 });
 
