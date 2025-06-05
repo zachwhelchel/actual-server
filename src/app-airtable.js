@@ -32,6 +32,15 @@ class Client {
     email,
     phone,
     coachNotes,
+    lastVisitedBudgetSmallScreen,
+    lastVisitedBudgetLargeScreen,
+    lastChangedBudgetedAmount,
+    lastSyncedAccount,
+    lastInteractedWithAvatar,
+    lastEditedTransaction,
+    lastAddedAccount,
+    lastAddedCategory,
+    nextMeetingDate,
   ) {
     this.recordId = recordId;
     this.userId = userId;
@@ -45,6 +54,15 @@ class Client {
     this.email = email;
     this.phone = phone;
     this.coachNotes = coachNotes;
+    this.lastVisitedBudgetSmallScreen = lastVisitedBudgetSmallScreen;
+    this.lastVisitedBudgetLargeScreen = lastVisitedBudgetLargeScreen;
+    this.lastChangedBudgetedAmount = lastChangedBudgetedAmount;
+    this.lastSyncedAccount = lastSyncedAccount;
+    this.lastInteractedWithAvatar = lastInteractedWithAvatar;
+    this.lastEditedTransaction = lastEditedTransaction;
+    this.lastAddedAccount = lastAddedAccount;
+    this.lastAddedCategory = lastAddedCategory;
+    this.nextMeetingDate = nextMeetingDate;
   }
 }
 
@@ -68,6 +86,15 @@ const AIRTABLE_FIELDS = {
     EMAIL: 'client_email',
     PHONE: 'client_phone_number',
     COACH_NOTES: 'coach_notes',
+    LAST_VISITED_BUDGET_SMALL_SCREEN: 'last_visited_budget_small_screen',
+    LAST_VISITED_BUDGET_LARGE_SCREEN: 'last_visited_budget_large_screen',
+    LAST_CHANGED_BUDGETED_AMOUNT: 'last_changed_budgeted_amount',
+    LAST_SYNCED_ACCOUNT: 'last_synced_account',
+    LAST_INTERACTED_WITH_AVATAR: 'last_interacted_with_avatar',
+    LAST_EDITED_TRANSACTION: 'last_edited_transaction',
+    LAST_ADDED_ACCOUNT: 'last_added_account',
+    LAST_ADDED_CATEGORY: 'last_added_category',
+    NEXT_MEETING_DATE: 'next_meeting_date',
   },
   NEW_CLIENT: {
     FIRST_NAME: 'non_account_first',
@@ -77,6 +104,7 @@ const AIRTABLE_FIELDS = {
     STATUS: 'non_account_status',
     COACH_NOTES: 'coach_notes',
     NON_ACCOUNT_COACH: 'non_account_coach',
+    NEXT_MEETING_DATE: 'next_meeting_date',
   },
   USERS: {},
   COACHES: {},
@@ -113,7 +141,7 @@ function transformToClientEntities(records) {
       fields[AIRTABLE_FIELDS.CLIENTS.COACH_USER_ID]
         ? fields[AIRTABLE_FIELDS.CLIENTS.COACH_USER_ID][0]
         : null,
-      parsedSharedWith.length ? parsedSharedWith : [],
+      parsedSharedWith?.length ? parsedSharedWith : [],
       fields[AIRTABLE_FIELDS.CLIENTS.NAME]
         ? (Array.isArray(fields[AIRTABLE_FIELDS.CLIENTS.NAME]) 
             ? fields[AIRTABLE_FIELDS.CLIENTS.NAME][0] 
@@ -137,6 +165,33 @@ function transformToClientEntities(records) {
         : null,
       fields[AIRTABLE_FIELDS.CLIENTS.COACH_NOTES]
         ? fields[AIRTABLE_FIELDS.CLIENTS.COACH_NOTES]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_VISITED_BUDGET_SMALL_SCREEN]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_VISITED_BUDGET_SMALL_SCREEN][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_VISITED_BUDGET_LARGE_SCREEN]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_VISITED_BUDGET_LARGE_SCREEN][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_CHANGED_BUDGETED_AMOUNT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_CHANGED_BUDGETED_AMOUNT][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_SYNCED_ACCOUNT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_SYNCED_ACCOUNT][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_INTERACTED_WITH_AVATAR]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_INTERACTED_WITH_AVATAR][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_EDITED_TRANSACTION]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_EDITED_TRANSACTION][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_ADDED_ACCOUNT]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_ADDED_ACCOUNT][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LAST_ADDED_CATEGORY]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LAST_ADDED_CATEGORY][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.NEXT_MEETING_DATE]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.NEXT_MEETING_DATE]
         : null,
     );
   });
@@ -293,6 +348,72 @@ app.post('/user', async (req, res) => {
     throw error;
   }
 });
+
+
+app.post('/update-analytics', async (req, res) => {
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+  const session = validateSession(req, res);
+
+  let userId = null;
+
+
+  console.log('update-analytics')
+  console.log(req.body)
+
+  const base = new Airtable({
+    apiKey: REACT_APP_AIRTABLE_KEY,
+  }).base(REACT_APP_AIRTABLE_BASE);
+
+  try {
+    const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+      .select({
+        filterByFormula: `{user_id} = '${session.user_id}'`,
+      })
+      .all();
+
+      // If user exists, return the record
+      if (existingRecords.length > 0) {
+        userId = existingRecords[0].id;
+      }
+
+      try {
+        const updatedRecord = await base(REACT_APP_AIRTABLE_TABLE).update([
+          {
+            id: userId,
+            fields: {
+              last_visited_budget_small_screen: req.body.last_visited_budget_small_screen,
+              last_visited_budget_large_screen: req.body.last_visited_budget_large_screen,
+              last_changed_budgeted_amount: req.body.last_changed_budgeted_amount,
+              last_synced_account: req.body.last_synced_account,
+              last_interacted_with_avatar: req.body.last_interacted_with_avatar,
+              last_edited_transaction: req.body.last_edited_transaction,
+              last_added_account: req.body.last_added_account,
+              last_added_category: req.body.last_added_category,
+            },
+          },
+        ]);
+
+        res.send({
+          status: 'ok',
+        });
+      } catch (error) {
+        console.error('Error updating user analytics:', error);
+        throw error;
+      }
+
+  } catch (error) {
+    console.error('Failed to updating user analytics:', error);
+    // Return original record if transformation fails
+    return null;
+  }
+
+
+});
+
+
 
 async function transformCoachPhoto(record) {
   // If the record doesn't exist or doesn't have a coach_photo, return the record as-is
@@ -613,8 +734,6 @@ app.post('/clients', async function (request, response) {
     // Transform records into Client entities
     const clientEntities = transformToClientEntities(clientRecords);
 
-    console.log('clientEntities', clientEntities);
-
     // Return all the clients
     const results = {
       clients: clientEntities,
@@ -639,6 +758,8 @@ app.post('/update-internal-client', async (req, res) => {
 
   const session = validateSession(req, res);
 
+  const nextMeetingDate = req.body.nextMeetingDate || null;
+
   const base = new Airtable({
     apiKey: REACT_APP_AIRTABLE_KEY,
   }).base(REACT_APP_AIRTABLE_BASE);
@@ -649,6 +770,7 @@ app.post('/update-internal-client', async (req, res) => {
         id: req.body.clientId,
         fields: {
           coach_notes: req.body.coachNotes,
+          next_meeting_date: nextMeetingDate,
         },
       },
     ]);
@@ -683,6 +805,7 @@ app.post('/update-external-client', async (req, res) => {
   const phone = req.body.phone;
   const status = req.body.status;
   const coachNotes = req.body.coachNotes;
+  const nextMeetingDate = req.body.nextMeetingDate || null;
 
   try {
     const updatedRecord = await base(AIRTABLE_TABLES.CLIENTS).update([
@@ -695,6 +818,7 @@ app.post('/update-external-client', async (req, res) => {
           [AIRTABLE_FIELDS.NEW_CLIENT.PHONE]: phone,
           [AIRTABLE_FIELDS.NEW_CLIENT.STATUS]: status,
           [AIRTABLE_FIELDS.NEW_CLIENT.COACH_NOTES]: coachNotes,
+          [AIRTABLE_FIELDS.NEW_CLIENT.NEXT_MEETING_DATE]: nextMeetingDate,
         },
       },
     ]);
@@ -762,6 +886,7 @@ app.post('/create-client', async function (request, response) {
     const phone = request.body.phone;
     const status = request.body.status;
     const coachNotes = request.body.coachNotes;
+    const nextMeetingDate = request.body.nextMeetingDate || null;
 
     // Set up Airtable connection
     let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
@@ -798,6 +923,7 @@ app.post('/create-client', async function (request, response) {
           [AIRTABLE_FIELDS.NEW_CLIENT.STATUS]: status,
           [AIRTABLE_FIELDS.NEW_CLIENT.COACH_NOTES]: coachNotes,
           [AIRTABLE_FIELDS.NEW_CLIENT.NON_ACCOUNT_COACH]: [coachRecordId],
+          [AIRTABLE_FIELDS.NEW_CLIENT.NEXT_MEETING_DATE]: nextMeetingDate,
         },
       },
     ]);
