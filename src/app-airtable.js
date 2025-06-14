@@ -41,6 +41,18 @@ class Client {
     lastAddedAccount,
     lastAddedCategory,
     nextMeetingDate,
+    address,
+    city,
+    state,
+    zip,
+    timezone,
+    contactPreference,
+    leadSource,
+    budgetingPlatform,
+    partnerFirstName,
+    partnerLastName,
+    partnerEmail,
+    partnerPhoneNumber,
   ) {
     this.recordId = recordId;
     this.userId = userId;
@@ -63,6 +75,18 @@ class Client {
     this.lastAddedAccount = lastAddedAccount;
     this.lastAddedCategory = lastAddedCategory;
     this.nextMeetingDate = nextMeetingDate;
+    this.address = address;
+    this.city = city;
+    this.state = state;
+    this.zip = zip;
+    this.timezone = timezone;
+    this.contactPreference = contactPreference;
+    this.leadSource = leadSource;
+    this.budgetingPlatform = budgetingPlatform;
+    this.partnerFirstName = partnerFirstName;
+    this.partnerLastName = partnerLastName;
+    this.partnerEmail = partnerEmail;
+    this.partnerPhoneNumber = partnerPhoneNumber;
   }
 }
 
@@ -95,6 +119,18 @@ const AIRTABLE_FIELDS = {
     LAST_ADDED_ACCOUNT: 'last_added_account',
     LAST_ADDED_CATEGORY: 'last_added_category',
     NEXT_MEETING_DATE: 'next_meeting_date',
+    ADDRESS: 'address',
+    CITY: 'city',
+    STATE: 'state',
+    ZIP: 'zip',
+    TIMEZONE: 'timezone',
+    CONTACT_PREFERENCE: 'contact_preference',
+    LEAD_SOURCE: 'lead_source',
+    BUDGETING_PLATFORM: 'budgeting_platform',
+    PARTNER_FIRST_NAME: 'partner_first_name',
+    PARTNER_LAST_NAME: 'partner_last_name',
+    PARTNER_EMAIL: 'partner_email',
+    PARTNER_PHONE_NUMBER: 'partner_phone_number',
   },
   NEW_CLIENT: {
     FIRST_NAME: 'non_account_first',
@@ -192,6 +228,42 @@ function transformToClientEntities(records) {
         : null,
       fields[AIRTABLE_FIELDS.CLIENTS.NEXT_MEETING_DATE]
         ? fields[AIRTABLE_FIELDS.CLIENTS.NEXT_MEETING_DATE]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.ADDRESS]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.ADDRESS]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.CITY]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.CITY]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.STATE]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.STATE]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.ZIP]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.ZIP]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.TIMEZONE]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.TIMEZONE]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.CONTACT_PREFERENCE]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.CONTACT_PREFERENCE]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.LEAD_SOURCE]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.LEAD_SOURCE]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.BUDGETING_PLATFORM]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.BUDGETING_PLATFORM]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.PARTNER_FIRST_NAME]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.PARTNER_FIRST_NAME]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.PARTNER_LAST_NAME]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.PARTNER_LAST_NAME]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.PARTNER_EMAIL]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.PARTNER_EMAIL]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.PARTNER_PHONE_NUMBER]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.PARTNER_PHONE_NUMBER]
         : null,
     );
   });
@@ -771,6 +843,17 @@ app.post('/update-internal-client', async (req, res) => {
         fields: {
           coach_notes: req.body.coachNotes,
           next_meeting_date: nextMeetingDate,
+          address: req.body.address,
+          city: req.body.city,
+          state: req.body.state,
+          zip: req.body.zip,
+          timezone: req.body.timezone,
+          contact_preference: req.body.contactPreference || null,
+          lead_source: req.body.leadSource,
+          partner_first_name: req.body.partnerFirstName,
+          partner_last_name: req.body.partnerLastName,
+          partner_email: req.body.partnerEmail,
+          partner_phone_number: req.body.partnerPhoneNumber,
         },
       },
     ]);
@@ -819,6 +902,18 @@ app.post('/update-external-client', async (req, res) => {
           [AIRTABLE_FIELDS.NEW_CLIENT.STATUS]: status,
           [AIRTABLE_FIELDS.NEW_CLIENT.COACH_NOTES]: coachNotes,
           [AIRTABLE_FIELDS.NEW_CLIENT.NEXT_MEETING_DATE]: nextMeetingDate,
+          address: req.body.address,
+          city: req.body.city,
+          state: req.body.state,
+          zip: req.body.zip,
+          timezone: req.body.timezone,
+          contact_preference: req.body.contactPreference || null,
+          lead_source: req.body.leadSource,
+          budgeting_platform: req.body.budgetingPlatform || null,
+          partner_first_name: req.body.partnerFirstName,
+          partner_last_name: req.body.partnerLastName,
+          partner_email: req.body.partnerEmail,
+          partner_phone_number: req.body.partnerPhoneNumber,
         },
       },
     ]);
@@ -924,6 +1019,18 @@ app.post('/create-client', async function (request, response) {
           [AIRTABLE_FIELDS.NEW_CLIENT.COACH_NOTES]: coachNotes,
           [AIRTABLE_FIELDS.NEW_CLIENT.NON_ACCOUNT_COACH]: [coachRecordId],
           [AIRTABLE_FIELDS.NEW_CLIENT.NEXT_MEETING_DATE]: nextMeetingDate,
+          address: request.body.address,
+          city: request.body.city,
+          state: request.body.state,
+          zip: request.body.zip,
+          timezone: request.body.timezone,
+          contact_preference: request.body.contactPreference || null,
+          lead_source: request.body.leadSource,
+          budgeting_platform: request.body.budgetingPlatform || null,
+          partner_first_name: request.body.partnerFirstName,
+          partner_last_name: request.body.partnerLastName,
+          partner_email: request.body.partnerEmail,
+          partner_phone_number: request.body.partnerPhoneNumber,
         },
       },
     ]);
