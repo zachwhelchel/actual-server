@@ -385,6 +385,7 @@ app.post('/user', async (req, res) => {
             first_name: firstName,
             last_name: lastName,
             coach: [req.body.coachId],
+            coach_selection_source: req.body.coachSelectionSource,
           },
         },
       ]);
@@ -549,6 +550,7 @@ app.post('/update-coach', async (req, res) => {
 
   let userId = session.user_id;
   let coachId = req.body.coachId;
+  let coachSelectionSource = req.body.coachSelectionSource;
 
   const base = new Airtable({
     apiKey: REACT_APP_AIRTABLE_KEY,
@@ -571,6 +573,7 @@ app.post('/update-coach', async (req, res) => {
         id: userId,
         fields: {
           coach: [coachId],
+          coach_selection_source: coachSelectionSource,
         },
       },
     ]);
@@ -581,6 +584,7 @@ app.post('/update-coach', async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating coach relationship:', error);
+    console.error('Error updating coach relationship:', req.body);
     throw error;
   }
 });

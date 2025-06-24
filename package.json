@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "24.0.27",
+  "version": "24.0.28",
   "license": "MIT",
   "description": "actual syncing server",
   "type": "module",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@actual-app/crdt": "2.1.0",
-    "@zachwhelchel/actual-app-web-multi": "24.0.27",
+    "@zachwhelchel/actual-app-web-multi": "24.0.28",
     "airtable": "^0.12.2",
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^11.7.0",
