@@ -45,6 +45,20 @@ app.post('/api/create_link_token', async function (request, response) {
     request.body.item_id !== null &&
     request.body.item_id !== '';
 
+  // Detect if request is from React Native
+  const isReactNative = request.headers['user-agent']?.includes('Mobile') || 
+                        request.headers['user-agent']?.includes('ReactNative');
+  
+  // Set appropriate redirect URI
+  const redirectUri = isReactNative ? 
+  'https://mybudgetcoach.com/oauth/plaid' :  // Universal Link for mobile
+  process.env.REACT_APP_PLAID_REDIRECT_URL;  // Web redirect for browser
+  
+  console.log('Detected platform:', isReactNative ? 'React Native' : 'Web');
+  console.log('Using redirect URI:', redirectUri);
+
+
+
   console.log(`request.body: ${request.body}`);
 
   const plaidAccountFilters = {
@@ -116,11 +130,12 @@ app.post('/api/create_link_token', async function (request, response) {
       client_name: 'MyBudgetCoach',
       language: 'en',
       webhook: 'https://webhook.example.com',
-      redirect_uri: REACT_APP_PLAID_REDIRECT_URL,
       country_codes: ['US'],
       access_token: accessToken,
       account_filters: plaidAccountFilters,
+      redirect_uri: redirectUri,
     };
+
   } else {
     // Code for when item_id doesn't exist
     console.log('No item_id provided');
@@ -133,10 +148,11 @@ app.post('/api/create_link_token', async function (request, response) {
       products: ['transactions'],
       language: 'en',
       webhook: 'https://webhook.example.com',
-      redirect_uri: REACT_APP_PLAID_REDIRECT_URL,
       country_codes: ['US'],
       account_filters: plaidAccountFilters,
+      redirect_uri: redirectUri,
     };
+
   }
 
   console.log('create_link_token');
