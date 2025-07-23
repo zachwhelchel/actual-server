@@ -1502,10 +1502,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zachwhelchel/actual-app-web-multi@npm:24.0.37":
-  version: 24.0.37
-  resolution: "@zachwhelchel/actual-app-web-multi@npm:24.0.37"
-  checksum: 10c0/3db3e602dcdde0ce4939a622d58d9827239bfa11d3d4e77611eae3811c6828d219289a13344a23dfe4d511f14f78b809b040f2b751606b05b56316cf3a3c1e39
+"@zachwhelchel/actual-app-web-multi@npm:24.0.39":
+  version: 24.0.39
+  resolution: "@zachwhelchel/actual-app-web-multi@npm:24.0.39"
+  checksum: 10c0/58606a52910bc9170e9534464cc14f817a36b3d2d12e9d623a3a8eee68f6fe7d116415332d3be1bc0b28f354c0fe59b228243b00afb6b4f2237eba4d25ba57ad
   languageName: node
   linkType: hard
 
@@ -1584,7 +1584,7 @@ __metadata:
     "@types/uuid": "npm:^9.0.0"
     "@typescript-eslint/eslint-plugin": "npm:^5.51.0"
     "@typescript-eslint/parser": "npm:^5.51.0"
-    "@zachwhelchel/actual-app-web-multi": "npm:24.0.37"
+    "@zachwhelchel/actual-app-web-multi": "npm:24.0.39"
     airtable: "npm:^0.12.2"
     bcrypt: "npm:^5.1.1"
     better-sqlite3: "npm:^11.7.0"
