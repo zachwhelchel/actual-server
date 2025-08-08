@@ -495,7 +495,7 @@ app.post('/create-checkout-session', async (req, res) => {
   const session = validateSession(req, res);
 
   try {
-    const { userId, successUrl, cancelUrl } = req.body;
+    const { userId, successUrl, cancelUrl, premium } = req.body;
     
     console.log("hellllloooo")
     console.log(req.body)
@@ -504,30 +504,62 @@ app.post('/create-checkout-session', async (req, res) => {
 
     //could prefill email but with apple anon emails from apple login would be a weird experience.
     //idk if the prefill locks it or not either.
-    const session = await stripe.checkout.sessions.create({
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      line_items: [
-        {
-          price: 'price_1RtYGpRtLF82W4vRg9hkdxNS', // Your premium price ID
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      metadata: {
-        app_user_id: userId,
-      },
-      subscription_data: {
+
+
+    if (premium) {
+      const session = await stripe.checkout.sessions.create({
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        line_items: [
+          {
+            price: 'price_1RtYGpRtLF82W4vRg9hkdxNS', // Your premium price ID
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
         metadata: {
           app_user_id: userId,
         },
-      },
-    });
+        subscription_data: {
+          metadata: {
+            app_user_id: userId,
+          },
+        },
+      });
 
-    res.send({
-      status: 'ok',
-      data: session.url,
-    });
+      res.send({
+        status: 'ok',
+        data: session.url,
+      });
+
+    } else {
+
+      const session = await stripe.checkout.sessions.create({
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        line_items: [
+          {
+            price: 'price_1RtYGTRtLF82W4vRE77BF358', // Your basic price ID
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
+        metadata: {
+          app_user_id: userId,
+        },
+        subscription_data: {
+          metadata: {
+            app_user_id: userId,
+          },
+        },
+      });
+
+      res.send({
+        status: 'ok',
+        data: session.url,
+      });
+    }
+
 
   } catch (error) {
     console.error('Error create-checkout-session:', error);
