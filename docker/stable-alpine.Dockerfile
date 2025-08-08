@@ -44,6 +44,9 @@ ENV REACT_APP_AIRTABLE_TABLE=$REACT_APP_AIRTABLE_TABLE
 ARG REACT_APP_AIRTABLE_KEY
 ENV REACT_APP_AIRTABLE_KEY=$REACT_APP_AIRTABLE_KEY
 
+ARG REACT_APP_STRIPE_SECRET_KEY
+ENV REACT_APP_STRIPE_SECRET_KEY=$REACT_APP_STRIPE_SECRET_KEY
+
 RUN yarn workspaces focus --all --production
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 

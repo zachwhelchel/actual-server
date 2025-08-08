@@ -6,6 +6,7 @@ import {
 } from './util/middlewares.js';
 import validateSession from './util/validate-user.js';
 import Airtable from 'airtable';
+import Stripe from 'stripe';
 
 import { getUserInfo } from './account-db.js';
 
@@ -488,6 +489,56 @@ app.post('/update-analytics', async (req, res) => {
 
 
 
+app.post('/create-checkout-session', async (req, res) => {
+
+  const stripe = new Stripe(process.env.REACT_APP_STRIPE_SECRET_KEY);
+  const session = validateSession(req, res);
+
+  try {
+    const { userId, successUrl, cancelUrl } = req.body;
+    
+    console.log("hellllloooo")
+    console.log(req.body)
+    console.log(successUrl)
+    console.log(cancelUrl)
+
+    //could prefill email but with apple anon emails from apple login would be a weird experience.
+    //idk if the prefill locks it or not either.
+    const session = await stripe.checkout.sessions.create({
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      line_items: [
+        {
+          price: 'price_1RtYGpRtLF82W4vRg9hkdxNS', // Your premium price ID
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      metadata: {
+        app_user_id: userId,
+      },
+      subscription_data: {
+        metadata: {
+          app_user_id: userId,
+        },
+      },
+    });
+
+    res.send({
+      status: 'ok',
+      data: session.url,
+    });
+
+  } catch (error) {
+    console.error('Error create-checkout-session:', error);
+    throw error;
+  }
+
+});
+
+
+
+
 async function transformCoachPhoto(record) {
   // If the record doesn't exist or doesn't have a coach_photo, return the record as-is
   if (
@@ -641,6 +692,8 @@ app.post('/update-user', async (req, res) => {
           utm_source: req.body.utm_source,
           utm_term: req.body.utm_term,
           utm_content: req.body.utm_content,
+          plan: req.body.plan_purchased,
+          status: req.body.status,
         },
       },
     ]);
