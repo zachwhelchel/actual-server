@@ -726,9 +726,29 @@ app.post('/update-user', async (req, res) => {
           utm_content: req.body.utm_content,
           plan: req.body.plan_purchased,
           status: req.body.status,
+          ...(req.body.anonymous_purchaser && { anonymous_purchaser: req.body.anonymous_purchaser })
         },
       },
     ]);
+
+
+
+    //for now this just won't work. oh well. we can merge it later.
+
+    // if (req.body.anonymous_purchaser) {
+    //   // Check if anonymous_purchaser exists and has 'anon' prefix
+    //   if (req.body.anonymous_purchaser && req.body.anonymous_purchaser.startsWith('anon_')) {
+    //     try {
+    //       // Associate the anonymous user with the real user ID
+    //       await associateAnonymousUser(req.body.anonymous_purchaser, userId);
+    //       console.log(`Successfully associated anonymous user ${req.body.anonymous_purchaser} with user ${userId}`);
+    //     } catch (error) {
+    //       console.error('Failed to associate anonymous user:', error);
+    //       // Continue with the flow even if association fails
+    //     }
+    //   }
+    // }
+
 
     let transformed = await transformCoachPhoto(updatedRecord[0]);
     res.send({
@@ -741,6 +761,35 @@ app.post('/update-user', async (req, res) => {
     throw error;
   }
 });
+
+
+// async function associateAnonymousUser(anonymousUserId, realUserId) {
+//   const REVENUECAT_SECRET_KEY = process.env.REVENUECAT_SECRET_KEY; // Your secret key from RevenueCat dashboard
+  
+//   // OR SHOULD THIS USE THE ALIAS STUFF CLAUD MENTIONED AS WELL?
+
+//   const response = await fetch(`https://api.revenuecat.com/v1/subscribers/${anonymousUserId}/attribution`, {
+//     method: 'POST',
+//     headers: {
+//       'Authorization': `Bearer ${REVENUECAT_SECRET_KEY}`,
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify({
+//       data: {
+//         rc_attribution_id: realUserId,
+//       }
+//     })
+//   });
+
+//   if (!response.ok) {
+//     const errorData = await response.text();
+//     throw new Error(`RevenueCat API error: ${response.status} - ${errorData}`);
+//   }
+
+//   return await response.json();
+// }
+
+
 
 app.post('/invite-to-share', async (req, res) => {
   let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
