@@ -50,7 +50,7 @@ app.post('/create-checkout-session', async (req, res) => {
   const stripe = new Stripe(process.env.REACT_APP_STRIPE_SECRET_KEY);
 
   try {
-    const { userId, successUrl, cancelUrl, premium } = req.body;
+    const { userId, successUrl, cancelUrl, premium, discount } = req.body;
     
     console.log("hellllloooo")
     console.log(req.body)
@@ -62,12 +62,13 @@ app.post('/create-checkout-session', async (req, res) => {
 
 
     if (premium) {
-      const session = await stripe.checkout.sessions.create({
+
+      const sessionConfig = {
         success_url: successUrl,
         cancel_url: cancelUrl,
         line_items: [
           {
-            price: 'price_1RtYGpRtLF82W4vRg9hkdxNS', // Your premium price ID
+            price: 'price_1RtYGpRtLF82W4vRg9hkdxNS',
             quantity: 1,
           },
         ],
@@ -80,7 +81,17 @@ app.post('/create-checkout-session', async (req, res) => {
             app_user_id: userId,
           },
         },
-      });
+      };
+
+      if (discount === "50_off_first_month") {
+        sessionConfig.discounts = [
+          {
+            coupon: 'mKbKWxAN',
+          },
+        ];
+      }
+
+      const session = await stripe.checkout.sessions.create(sessionConfig);
 
       res.send({
         status: 'ok',
