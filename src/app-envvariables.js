@@ -90,6 +90,15 @@ app.post('/create-checkout-session', async (req, res) => {
           },
         ];
       }
+      else if (discount === "7_day_free_trial_and_50_percent_off_first_month") {
+        sessionConfig.discounts = [
+          {
+            coupon: 'mKbKWxAN',
+          },
+        ];
+        sessionConfig.subscription_data.trial_period_days = 7;
+      }
+      
 
       const session = await stripe.checkout.sessions.create(sessionConfig);
 
@@ -100,12 +109,13 @@ app.post('/create-checkout-session', async (req, res) => {
 
     } else {
 
-      const session = await stripe.checkout.sessions.create({
+
+      const sessionConfig = {
         success_url: successUrl,
         cancel_url: cancelUrl,
         line_items: [
           {
-            price: 'price_1RtYGTRtLF82W4vRE77BF358', // Your basic price ID
+            price: 'price_1RtYGTRtLF82W4vRE77BF358',
             quantity: 1,
           },
         ],
@@ -118,7 +128,13 @@ app.post('/create-checkout-session', async (req, res) => {
             app_user_id: userId,
           },
         },
-      });
+      };
+
+      if (discount === "7_day_free_trial") {
+        sessionConfig.subscription_data.trial_period_days = 7;
+      }
+
+      const session = await stripe.checkout.sessions.create(sessionConfig);
 
       res.send({
         status: 'ok',
