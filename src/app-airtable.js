@@ -387,6 +387,11 @@ app.post('/user', async (req, res) => {
             last_name: lastName,
             coach: [req.body.coachId],
             coach_selection_source: req.body.coachSelectionSource,
+            ...(req.body.utm_campaign && { utm_campaign: req.body.utm_campaign }),
+            ...(req.body.utm_medium && { utm_medium: req.body.utm_medium }),
+            ...(req.body.utm_source && { utm_source: req.body.utm_source }),
+            ...(req.body.utm_term && { utm_term: req.body.utm_term }),
+            ...(req.body.utm_content && { utm_content: req.body.utm_content }),
           },
         },
       ]);
@@ -406,6 +411,11 @@ app.post('/user', async (req, res) => {
             email: user.email,
             first_name: firstName,
             last_name: lastName,
+            ...(req.body.utm_campaign && { utm_campaign: req.body.utm_campaign }),
+            ...(req.body.utm_medium && { utm_medium: req.body.utm_medium }),
+            ...(req.body.utm_source && { utm_source: req.body.utm_source }),
+            ...(req.body.utm_term && { utm_term: req.body.utm_term }),
+            ...(req.body.utm_content && { utm_content: req.body.utm_content }),
           },
         },
       ]);
@@ -486,6 +496,64 @@ app.post('/update-analytics', async (req, res) => {
 
 
 });
+
+
+
+app.post('/update-onboarding-progress', async (req, res) => {
+  let REACT_APP_AIRTABLE_BASE = process.env.REACT_APP_AIRTABLE_BASE;
+  let REACT_APP_AIRTABLE_TABLE = process.env.REACT_APP_AIRTABLE_TABLE;
+  let REACT_APP_AIRTABLE_KEY = process.env.REACT_APP_AIRTABLE_KEY;
+
+  const session = validateSession(req, res);
+
+  let userId = null;
+
+  console.log('onboarding_progress')
+  console.log(req.body)
+
+  const base = new Airtable({
+    apiKey: REACT_APP_AIRTABLE_KEY,
+  }).base(REACT_APP_AIRTABLE_BASE);
+
+  try {
+    const existingRecords = await base(REACT_APP_AIRTABLE_TABLE)
+      .select({
+        filterByFormula: `{user_id} = '${session.user_id}'`,
+      })
+      .all();
+
+      // If user exists, return the record
+      if (existingRecords.length > 0) {
+        userId = existingRecords[0].id;
+      }
+
+      try {
+        const updatedRecord = await base(REACT_APP_AIRTABLE_TABLE).update([
+          {
+            id: userId,
+            fields: {
+              onboarding_progress: req.body.onboarding_progress,
+            },
+          },
+        ]);
+
+        res.send({
+          status: 'ok',
+        });
+      } catch (error) {
+        console.error('Error updating onboarding_progress:', error);
+        throw error;
+      }
+
+  } catch (error) {
+    console.error('Failed to updating onboarding_progress:', error);
+    // Return original record if transformation fails
+    return null;
+  }
+
+
+});
+
 
 
 
