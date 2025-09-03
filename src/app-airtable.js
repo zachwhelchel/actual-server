@@ -584,6 +584,9 @@ app.post('/create-checkout-session', async (req, res) => {
             quantity: 1,
           },
         ],
+        automatic_tax: {
+          enabled: true,
+        },
         mode: 'subscription',
         metadata: {
           app_user_id: userId,
@@ -611,6 +614,9 @@ app.post('/create-checkout-session', async (req, res) => {
             quantity: 1,
           },
         ],
+        automatic_tax: {
+          enabled: true,
+        },
         mode: 'subscription',
         metadata: {
           app_user_id: userId,
