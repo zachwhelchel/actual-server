@@ -101,7 +101,10 @@ app.post('/create-checkout-session', async (req, res) => {
         ];
         sessionConfig.subscription_data.trial_period_days = 7;
       }
-      
+      else if (discount === "35_day_free_trial") {
+        sessionConfig.subscription_data.trial_period_days = 35;
+      }
+
 
       const session = await stripe.checkout.sessions.create(sessionConfig);
 
@@ -138,6 +141,9 @@ app.post('/create-checkout-session', async (req, res) => {
 
       if (discount === "7_day_free_trial") {
         sessionConfig.subscription_data.trial_period_days = 7;
+      }
+      else if (discount === "35_day_free_trial") {
+        sessionConfig.subscription_data.trial_period_days = 35;
       }
 
       const session = await stripe.checkout.sessions.create(sessionConfig);
