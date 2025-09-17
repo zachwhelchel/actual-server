@@ -50,7 +50,7 @@ app.post('/create-checkout-session', async (req, res) => {
   const stripe = new Stripe(process.env.REACT_APP_STRIPE_SECRET_KEY);
 
   try {
-    const { userId, successUrl, cancelUrl, premium, discount } = req.body;
+    const { userId, successUrl, cancelUrl, premium, discount, fp_tid } = req.body;
     
     console.log("hellllloooo")
     console.log(req.body)
@@ -78,6 +78,7 @@ app.post('/create-checkout-session', async (req, res) => {
         mode: 'subscription',
         metadata: {
           app_user_id: userId,
+          ...(fp_tid && { fp_tid: fp_tid })
         },
         subscription_data: {
           metadata: {
@@ -131,6 +132,7 @@ app.post('/create-checkout-session', async (req, res) => {
         mode: 'subscription',
         metadata: {
           app_user_id: userId,
+          ...(fp_tid && { fp_tid: fp_tid })
         },
         subscription_data: {
           metadata: {
