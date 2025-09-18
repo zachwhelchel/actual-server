@@ -66,6 +66,7 @@ app.post('/create-checkout-session', async (req, res) => {
       const sessionConfig = {
         success_url: successUrl,
         cancel_url: cancelUrl,
+        allow_promotion_codes: true,
         line_items: [
           {
             price: 'price_1RtYGpRtLF82W4vRg9hkdxNS',
@@ -120,6 +121,7 @@ app.post('/create-checkout-session', async (req, res) => {
       const sessionConfig = {
         success_url: successUrl,
         cancel_url: cancelUrl,
+        allow_promotion_codes: true,
         line_items: [
           {
             price: 'price_1RtYGTRtLF82W4vRE77BF358',

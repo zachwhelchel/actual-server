@@ -392,6 +392,8 @@ app.post('/user', async (req, res) => {
             ...(req.body.utm_source && { utm_source: req.body.utm_source }),
             ...(req.body.utm_term && { utm_term: req.body.utm_term }),
             ...(req.body.utm_content && { utm_content: req.body.utm_content }),
+            ...(req.body.fprom_tid && { fprom_tid: req.body.fprom_tid }),
+            ...(req.body.fprom_ref && { fprom_ref: req.body.fprom_ref }),
           },
         },
       ]);
@@ -416,6 +418,8 @@ app.post('/user', async (req, res) => {
             ...(req.body.utm_source && { utm_source: req.body.utm_source }),
             ...(req.body.utm_term && { utm_term: req.body.utm_term }),
             ...(req.body.utm_content && { utm_content: req.body.utm_content }),
+            ...(req.body.fprom_tid && { fprom_tid: req.body.fprom_tid }),
+            ...(req.body.fprom_ref && { fprom_ref: req.body.fprom_ref }),
           },
         },
       ]);
