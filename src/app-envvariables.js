@@ -66,7 +66,6 @@ app.post('/create-checkout-session', async (req, res) => {
       const sessionConfig = {
         success_url: successUrl,
         cancel_url: cancelUrl,
-        allow_promotion_codes: true,
         line_items: [
           {
             price: 'price_1RtYGpRtLF82W4vRg9hkdxNS',
@@ -105,6 +104,9 @@ app.post('/create-checkout-session', async (req, res) => {
       }
       else if (discount === "35_day_free_trial") {
         sessionConfig.subscription_data.trial_period_days = 35;
+        sessionConfig.allow_promotion_codes = true; //can't be along with discounts
+      } else {
+        sessionConfig.allow_promotion_codes = true; //can't be along with discounts
       }
 
 
@@ -121,7 +123,6 @@ app.post('/create-checkout-session', async (req, res) => {
       const sessionConfig = {
         success_url: successUrl,
         cancel_url: cancelUrl,
-        allow_promotion_codes: true,
         line_items: [
           {
             price: 'price_1RtYGTRtLF82W4vRE77BF358',
@@ -149,6 +150,8 @@ app.post('/create-checkout-session', async (req, res) => {
       else if (discount === "35_day_free_trial") {
         sessionConfig.subscription_data.trial_period_days = 35;
       }
+      sessionConfig.allow_promotion_codes = true; //can't be along with discounts
+
 
       const session = await stripe.checkout.sessions.create(sessionConfig);
 
