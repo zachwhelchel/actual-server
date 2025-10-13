@@ -560,6 +560,49 @@ app.post('/update-onboarding-progress', async (req, res) => {
 
 
 
+app.post('/create-portal-session', async (req, res) => {
+  const stripe = new Stripe(process.env.REACT_APP_STRIPE_SECRET_KEY);
+  const session = validateSession(req, res);
+
+  try {
+    const { successUrl } = req.body;
+    
+    let userId = session.user_id;
+
+    const subscriptions = await stripe.subscriptions.search({
+      query: `metadata['app_user_id']:'${userId}'`,
+    });
+
+    if (subscriptions.data.length === 0) {
+      return res.status(404).send({
+        status: 'error',
+        message: 'No subscription found for this user',
+      });
+    }
+
+    const stripeCustomerId = subscriptions.data[0].customer;
+    
+    // Create portal session
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: stripeCustomerId,
+      return_url: successUrl || 'https://app.mybudgetcoach.com',
+    });
+    
+    res.send({
+      status: 'ok',
+      data: portalSession.url,
+    });
+    
+  } catch (error) {
+    console.error('Error create-portal-session:', error);
+    res.status(500).send({
+      status: 'error',
+      message: error.message,
+    });
+  }
+});
+
+
 
 app.post('/create-checkout-session', async (req, res) => {
 
@@ -645,9 +688,6 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 
 });
-
-
-
 
 async function transformCoachPhoto(record) {
   // If the record doesn't exist or doesn't have a coach_photo, return the record as-is

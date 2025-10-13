@@ -1502,12 +1502,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zachwhelchel/actual-app-web-multi@npm:24.0.54":
-  version: 24.0.54
-  resolution: "@zachwhelchel/actual-app-web-multi@npm:24.0.54"
+"@zachwhelchel/actual-app-web-multi@npm:24.0.55":
+  version: 24.0.55
+  resolution: "@zachwhelchel/actual-app-web-multi@npm:24.0.55"
   dependencies:
     react-facebook-pixel: "npm:^1.0.4"
-  checksum: 10c0/a4557ea3d6859c5a7017591bdaecda4bf74953e8ca17811e5d86f90b139a19f4f9322944a848ad77c0380e0344535a16f4a089f1a8b0c2c68ab483df5a45a908
+  checksum: 10c0/97fd1827447b1376e840553fc29cfa0c5503f4caf76b63e8a34343467007f6e1ac1feae7a8430e4ad52b69cefaa24d4e0d1ffcab916371101aff0440ca35ae69
   languageName: node
   linkType: hard
 
@@ -1586,7 +1586,7 @@ __metadata:
     "@types/uuid": "npm:^9.0.0"
     "@typescript-eslint/eslint-plugin": "npm:^5.51.0"
     "@typescript-eslint/parser": "npm:^5.51.0"
-    "@zachwhelchel/actual-app-web-multi": "npm:24.0.54"
+    "@zachwhelchel/actual-app-web-multi": "npm:24.0.55"
     airtable: "npm:^0.12.2"
     bcrypt: "npm:^5.1.1"
     better-sqlite3: "npm:^11.7.0"
