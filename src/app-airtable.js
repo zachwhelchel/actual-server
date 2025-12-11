@@ -28,6 +28,7 @@ class Client {
     name,
     status,
     statusExpiresAt,
+    planType,
     joinedAt,
     lastShareRequestedAt,
     email,
@@ -62,6 +63,7 @@ class Client {
     this.name = name;
     this.status = status;
     this.statusExpiresAt = statusExpiresAt;
+    this.planType = planType;
     this.joinedAt = joinedAt;
     this.lastShareRequestedAt = lastShareRequestedAt;
     this.email = email;
@@ -103,6 +105,7 @@ const AIRTABLE_FIELDS = {
     NAME: 'client_name',
     STATUS: 'client_status',
     STATUS_EXPIRES_AT: 'client_status_expires_at',
+    PLAN_TYPE: 'client_plan',
     JOINED_AT: 'client_joined_at',
     COACH_USER_ID: 'client_coach_user_id',
     USER_ID: 'account_user_id',
@@ -187,6 +190,9 @@ function transformToClientEntities(records) {
       fields[AIRTABLE_FIELDS.CLIENTS.STATUS],
       fields[AIRTABLE_FIELDS.CLIENTS.STATUS_EXPIRES_AT]
         ? fields[AIRTABLE_FIELDS.CLIENTS.STATUS_EXPIRES_AT][0]
+        : null,
+      fields[AIRTABLE_FIELDS.CLIENTS.PLAN_TYPE]
+        ? fields[AIRTABLE_FIELDS.CLIENTS.PLAN_TYPE][0]
         : null,
       fields[AIRTABLE_FIELDS.CLIENTS.JOINED_AT]
         ? fields[AIRTABLE_FIELDS.CLIENTS.JOINED_AT][0]
