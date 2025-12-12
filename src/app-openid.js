@@ -4,7 +4,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares.js';
-import { disableOpenID, enableOpenID, isAdmin } from './account-db.js';
+import getAccountDb, { disableOpenID, enableOpenID, isAdmin } from './account-db.js';
 import {
   isValidRedirectUrl,
   loginWithOpenIdFinalize,
@@ -83,6 +83,32 @@ app.get('/config', async (req, res) => {
 });
 
 app.get('/callback', async (req, res) => {
+  // Check if Auth0 (or other OpenID provider) returned an error
+  if (req.query.error && req.query.error_description === 'duplicate_email') {
+    // Get the return URL from the pending request using the state
+    let redirectUrl = '/login';
+    
+    if (req.query.state) {
+      const accountDb = getAccountDb();
+      const pendingRequest = accountDb.first(
+        'SELECT return_url FROM pending_openid_requests WHERE state = ? AND expiry_time > ?',
+        [req.query.state, Date.now()],
+      );
+      
+      if (pendingRequest && pendingRequest.return_url) {
+        // Extract the origin from return_url and add /login path
+        const urlObj = new URL(pendingRequest.return_url);
+        redirectUrl = `${urlObj.origin}/login`;
+      }
+    }
+    
+    // Add the error parameter
+    const finalUrl = `${redirectUrl}?error=duplicate_account`;
+    
+    res.redirect(finalUrl);
+    return;
+  }
+
   let { error, url } = await loginWithOpenIdFinalize(req.query);
 
   if (error) {
