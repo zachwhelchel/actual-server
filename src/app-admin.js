@@ -498,6 +498,19 @@ app.get('/access/users', validateSessionMiddleware, async (req, res) => {
 
       allowedIds.push(existingRecords[0].get('coach_user_id')[0]);
     }
+
+    // Add additional_sharable_user_ids to allowedIds
+    const additionalIds = existingRecords[0].get('additional_sharable_user_ids');
+    if (additionalIds) {
+      try {
+        const parsedIds = JSON.parse(additionalIds);
+        if (Array.isArray(parsedIds)) {
+          allowedIds.push(...parsedIds);
+        }
+      } catch (error) {
+        console.error('Error parsing additional_sharable_user_ids:', error);
+      }
+    }
   }
 
   const filteredUsers = users.filter(
